@@ -52,3 +52,26 @@ export const resetPassword = async (
 };
 
 export default api;
+
+export const exchangeGoogleCode = async (code: string, redirectUri?: string): Promise<any> => {
+  const payload = redirectUri ? { code, redirectUri } : { code };
+  const response = await api.post('/auth/google/exchange-code', payload);
+  return response.data;
+};
+
+export const completeGoogleOnboarding = async (data: {
+  onboardingToken: string;
+  firstName: string;
+  lastName?: string;
+  phoneNumber: string;
+  accountType: 'individual' | 'organization';
+  organizationName?: string;
+}) => {
+  const response = await api.post('/auth/google/complete-onboarding', data);
+  return response.data;
+};
+
+export const linkGoogleAccount = async (data: { linkToken: string; password: string }) => {
+  const response = await api.post('/auth/google/link', data);
+  return response.data;
+};

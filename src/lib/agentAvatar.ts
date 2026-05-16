@@ -117,7 +117,7 @@ export const createAgentRobotAvatar = (
   ${cheek ? `<circle cx="${64 - eyeSpread - 8}" cy="67" r="3" fill="${voice.mouth}" opacity="0.5" />
   <circle cx="${64 + eyeSpread + 8}" cy="67" r="3" fill="${voice.mouth}" opacity="0.5" />` : ""}
   <rect x="${64 - Math.floor(mouthWidth / 2)}" y="72" width="${mouthWidth}" height="5" rx="2.5" fill="${voice.mouth}" />
-  <text x="64" y="102" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="700" fill="${palette.accent}">${label}</text>
+  <text x="64" y="102" text-anchor="middle" font-family="Inter, sans-serif" font-size="14" font-weight="700" fill="${palette.accent}">${label}</text>
 </svg>`.trim();
 
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;

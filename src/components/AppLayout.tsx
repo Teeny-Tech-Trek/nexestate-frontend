@@ -124,36 +124,37 @@ const AppLayout = () => {
     <div className="min-h-screen bg-[#F8FAFB]">
       {/* Top Navbar */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-br from-[#0a1628] via-[#0f1e3a] to-[#0a1628] shadow-sm">
-        <div className="px-4 lg:px-8 h-16 flex items-center justify-between">
+        <div className="flex items-center justify-between" style={{ height: "clamp(56px, 6vh, 68px)", padding: "0 clamp(12px, 2vw, 32px)" }}>
           {/* LEFT SECTION - Logo and Name */}
-          <div className="flex items-center gap-3 min-w-fit">
-            <div className="w-10 h-10 lg:w-12 lg:h-12 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="flex items-center gap-2.5 min-w-fit">
+            <div className="bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0" style={{ width: "clamp(36px, 3vw, 48px)", height: "clamp(36px, 3vw, 48px)" }}>
               <img src={logoImg} alt="logo" className="w-full h-full object-contain" />
             </div>
-            <div className="hidden sm:block">
-              <h2 className="font-semibold text-white text-base lg:text-lg">{userDisplayName}</h2>
-              <p className="text-xs lg:text-sm text-gray-100 leading-none">{subtitle}</p>
+            <div className="hidden sm:block min-w-0">
+              <h2 className="font-semibold text-white truncate" style={{ fontSize: "clamp(13px, 1.1vw, 17px)" }}>{userDisplayName}</h2>
+              <p className="text-gray-100 leading-none truncate" style={{ fontSize: "clamp(10px, 0.8vw, 13px)" }}>{subtitle}</p>
             </div>
           </div>
 
           {/* MIDDLE SECTION - Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-2 absolute left-1/2 -translate-x-1/2 z-10">
+          <nav className="hidden lg:flex items-center absolute left-1/2 -translate-x-1/2 z-10" style={{ gap: "clamp(2px, 0.3vw, 8px)" }}>
           {sidebarItems.map((item) => {
             const Icon = item.icon;
             const isActive = location.pathname === item.path;
-            
+
             return (
               <button
                 key={item.path}
                 onClick={() => navigate(item.path)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
-                  isActive 
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30' 
+                className={`flex items-center gap-1.5 rounded-lg font-medium transition-all duration-300 ${
+                  isActive
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
                     : 'text-gray-100 hover:bg-white/10 hover:text-white'
                 }`}
+                style={{ padding: "clamp(6px, 0.8vw, 10px) clamp(10px, 1.2vw, 18px)", fontSize: "clamp(12px, 0.92vw, 14px)" }}
               >
-                <Icon className="h-4 w-4" />
-                <span>{item.label}</span>
+                <Icon style={{ width: "clamp(14px, 1.1vw, 17px)", height: "clamp(14px, 1.1vw, 17px)" }} />
+                <span className="hidden xl:inline">{item.label}</span>
               </button>
             );
           })}
@@ -252,7 +253,8 @@ const AppLayout = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.2 }}
-            className="fixed top-16 right-4 z-50 w-72 bg-white border border-gray-200 rounded-lg shadow-xl"
+            className="fixed z-50 bg-white border border-gray-200 rounded-lg shadow-xl"
+            style={{ top: "clamp(60px, 7vh, 72px)", right: "clamp(8px, 1.5vw, 20px)", width: "min(300px, calc(100vw - 24px))" }}
           >
             {/* User Info */}
             <div 
@@ -322,11 +324,10 @@ const AppLayout = () => {
       </AnimatePresence>
 
       {/* Main Content Area */}
-      <div className="pt-16">
+      <div style={{ paddingTop: "clamp(56px, 6vh, 68px)" }}>
         {/* Page Content */}
         <main className="">
           <Outlet />
-          {/* < Dashboard/> */}
         </main>
       </div>
     </div>

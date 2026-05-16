@@ -257,20 +257,20 @@ export default function Avatars() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a1628] via-[#0f1e3a] to-[#0a1628] p-4 sm:p-6 lg:p-10">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a1628] via-[#0f1e3a] to-[#0a1628]" style={{ padding: "clamp(12px, 2vw, 32px)" }}>
       {/* Background blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-40">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative max-w-[1400px] mx-auto px-2 sm:px-4 lg:px-8 py-6 sm:py-8 lg:py-12">
-        {/* ── Header ──────────────────────────────────────────────────────── */}
-        <div className="mb-8 sm:mb-12">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6 sm:gap-8 mb-8 sm:mb-12">
-            <div className="space-y-3">
-              <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight">AI Agents</h1>
-              <p className="text-sm sm:text-lg text-slate-400">Intelligent automation for your sales team</p>
+      <div className="relative max-w-[1600px] mx-auto" style={{ padding: "clamp(12px, 2vw, 32px) clamp(6px, 1.2vw, 20px)" }}>
+        {/* ── Header ── */}
+        <div className="mb-6 sm:mb-10">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 sm:gap-6 mb-6 sm:mb-10">
+            <div className="space-y-2 min-w-0">
+              <h1 className="font-bold text-white tracking-tight" style={{ fontSize: "clamp(1.8rem, 4vw, 3.4rem)" }}>AI Agents</h1>
+              <p className="text-slate-400" style={{ fontSize: "clamp(0.85rem, 1.2vw, 1.1rem)" }}>Intelligent automation for your sales team</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 sm:gap-4">

@@ -7,7 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/AppLayout";
 import Navbar from "@/components/Navbar";
-import Index from "./pages/Index";
+import Index from "./pages/HomeAllPages";
 import Avatars from "./pages/Avatars";
 import Properties from "./pages/Properties";
 import Visits from "./pages/Visits";
@@ -17,6 +17,8 @@ import Settings from "./pages/Settings";
 import Pricing from "./pages/Pricing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import GoogleCallback from "./pages/GoogleCallback";
+import LinkGoogle from "./pages/LinkGoogle";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import NotFound from "./pages/NotFound";
@@ -69,6 +71,8 @@ const App = () => (
                     <Footer />
               </>
             } />
+            <Route path="/auth/google/callback" element={<GoogleCallback />} />
+            <Route path="/auth/google/link" element={<LinkGoogle />} />
             <Route path="/forgot-password" element={
               <>
                 <Navbar />

@@ -111,30 +111,41 @@ const ImageShowcaseSection = () => {
     id="showcase"
       className="relative w-full py-12 md:py-20 overflow-hidden"
       style={{
-        background: 'linear-gradient(135deg, #1e3a8a 0%, #1e293b 50%, #1e3a8a 100%)',
+        background: "linear-gradient(135deg,#060b24 0%,#0d1340 50%,#060b24 100%)",
       }}
     >
-      {/* Animated gradient background */}
-      <div className="absolute inset-0">
+      {/* Hero background */}
+      <div className="absolute inset-0 pointer-events-none">
         <motion.div
-          className="absolute top-0 left-0 w-full h-full"
+          className="absolute inset-0"
           animate={{
             background: [
-              'radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
-              'radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
-              'radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
+              "radial-gradient(ellipse 55% 55% at 15% 50%,rgba(59,130,246,0.22) 0%,transparent 65%)",
+              "radial-gradient(ellipse 55% 55% at 20% 55%,rgba(99,102,241,0.28) 0%,transparent 65%)",
+              "radial-gradient(ellipse 55% 55% at 15% 50%,rgba(59,130,246,0.22) 0%,transparent 65%)",
             ]
           }}
-          transition={{ duration: 10, repeat: Infinity }}
+          transition={{ duration: 8, repeat: Infinity }}
+        />
+        <motion.div
+          className="absolute inset-0"
+          animate={{
+            background: [
+              "radial-gradient(ellipse 50% 60% at 85% 40%,rgba(108,63,197,0.25) 0%,transparent 65%)",
+              "radial-gradient(ellipse 50% 60% at 80% 45%,rgba(139,92,246,0.30) 0%,transparent 65%)",
+              "radial-gradient(ellipse 50% 60% at 85% 40%,rgba(108,63,197,0.25) 0%,transparent 65%)",
+            ]
+          }}
+          transition={{ duration: 8, repeat: Infinity, delay: 2 }}
         />
       </div>
 
       {/* Grid overlay */}
       <div 
-        className="absolute inset-0 opacity-[0.05]"
+        className="absolute inset-0 opacity-[0.045] pointer-events-none"
         style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)',
-          backgroundSize: '50px 50px'
+          backgroundImage: "linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px)",
+          backgroundSize: "60px 60px"
         }}
       />
 

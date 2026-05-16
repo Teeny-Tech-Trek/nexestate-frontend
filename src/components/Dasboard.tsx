@@ -66,16 +66,16 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a1628] via-[#0f1e3a] to-[#0a1628] p-10">
+    <div className="min-h-screen bg-gradient-to-br from-[#0a1628] via-[#0f1e3a] to-[#0a1628]" style={{ padding: "clamp(16px, 3vw, 40px)" }}>
       <div className="max-w-[1920px] mx-auto">
         {/* Welcome Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-1">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div className="min-w-0">
+              <h1 className="font-bold text-white mb-1 truncate" style={{ fontSize: "clamp(1.4rem, 2.4vw, 2rem)" }}>
                 Welcome back, {headerInfo.userName}
               </h1>
-              <p className="text-slate-400">
+              <p className="text-slate-400" style={{ fontSize: "clamp(0.85rem, 1.1vw, 1rem)" }}>
                 {headerInfo.greeting}
               </p>
             </div>

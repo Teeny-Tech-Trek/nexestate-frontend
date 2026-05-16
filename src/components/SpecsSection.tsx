@@ -1,381 +1,301 @@
-import React, { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import React from "react";
 import { motion } from "framer-motion";
 import { MessageSquare, Calendar, Zap, Users } from "lucide-react";
 
-gsap.registerPlugin(ScrollTrigger);
+// ── Replace with your image ──
+import SpecsImg from "/Website-Images/SpecsSection-Image.png";
 
 const SpecsSection = () => {
-  const sectionRef = useRef(null);
-  const cardsRef = useRef([]);
-  const titleRef = useRef(null);
-  const badgeRef = useRef(null);
-  const subtitleRef = useRef(null);
-  const heroTextRef = useRef(null);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  useEffect(() => {
-    // Animate badge with 3D flip
-    gsap.fromTo(
-      badgeRef.current,
-      { opacity: 0, scale: 0.5, rotationY: -180 },
-      {
-        opacity: 1,
-        scale: 1,
-        rotationY: 0,
-        duration: 1,
-        ease: "back.out(1.7)",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 70%",
-        },
-      }
-    );
-
-    // Animate title with 3D depth
-    gsap.fromTo(
-      titleRef.current,
-      { opacity: 0, y: 100, z: -100, rotationX: 45 },
-      {
-        opacity: 1,
-        y: 0,
-        z: 0,
-        rotationX: 0,
-        duration: 1.2,
-        delay: 0.3,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 70%",
-        },
-      }
-    );
-
-    // Animate hero text
-    gsap.fromTo(
-      heroTextRef.current,
-      { opacity: 0, y: 50 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        delay: 0.6,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 70%",
-        },
-      }
-    );
-
-    // Animate subtitle
-    gsap.fromTo(
-      subtitleRef.current,
-      { opacity: 0, y: 30 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        delay: 0.8,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 70%",
-        },
-      }
-    );
-
-    // Animate cards with 3D perspective and stagger
-    cardsRef.current.forEach((card, index) => {
-      if (card) {
-        gsap.fromTo(
-          card,
-          {
-            opacity: 0,
-            rotateX: 45,
-            rotateY: -25,
-            z: -200,
-            scale: 0.8,
-          },
-          {
-            opacity: 1,
-            rotateX: 0,
-            rotateY: 0,
-            z: 0,
-            scale: 1,
-            duration: 1.2,
-            delay: 1 + index * 0.15,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: sectionRef.current,
-              start: "top 60%",
-            },
-          }
-        );
-      }
-    });
-
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, []);
-
-  // Floating particles component
-  const FloatingParticle = ({ delay, duration, initialX, initialY, size = 2 }) => (
-    <motion.div
-      className="absolute rounded-full bg-white/20"
-      style={{ width: size, height: size }}
-      initial={{ x: initialX, y: initialY, opacity: 0 }}
-      animate={{
-        x: [initialX, initialX + 50, initialX],
-        y: [initialY, initialY - 100, initialY],
-        opacity: [0, 0.6, 0],
-      }}
-      transition={{
-        duration,
-        delay,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
-    />
-  );
 
   const features = [
     {
-      icon: MessageSquare,
+      icon: <MessageSquare size={30} strokeWidth={1.8} />,
       title: "Lead Qualification",
-      description: "Intelligent conversations that identify high-value prospects"
+      description: "Intelligent conversations that identify high-value prospects",
+      color:    "#3B82F6",
+      colorMid: "#6366F1",
+      colorLt:  "#BAE6FD",
+      glow:     "rgba(59,130,246,0.5)",
+      // partial arc — blue on right side, ~60% filled, matches reference item 1
+      arcGradient: "conic-gradient(from 120deg, transparent 0%, #3B82F6 18%, #818CF8 55%, transparent 60%)",
     },
     {
-      icon: Calendar,
+      icon: <Calendar size={30} strokeWidth={1.8} />,
       title: "Smart Scheduling",
-      description: "Automated booking synced with your calendar"
+      description: "Automated booking synced with your calendar",
+      color:    "#8B5CF6",
+      colorMid: "#A855F7",
+      colorLt:  "#DDD6FE",
+      glow:     "rgba(139,92,246,0.5)",
+      // heavier fill, purple — matches reference item 2 (more filled)
+      arcGradient: "conic-gradient(from 100deg, transparent 0%, #7C3AED 12%, #A855F7 65%, transparent 70%)",
     },
     {
-      icon: Zap,
+      icon: <Zap size={30} strokeWidth={1.8} />,
       title: "Instant Follow-ups",
-      description: "Never miss an opportunity with timely responses"
+      description: "Never miss an opportunity with timely responses",
+      color:    "#14B8A6",
+      colorMid: "#06B6D4",
+      colorLt:  "#99F6E4",
+      glow:     "rgba(20,184,166,0.6)",
+      // teal — brightest, most filled, matches reference item 3
+      arcGradient: "conic-gradient(from 90deg, transparent 0%, #0D9488 10%, #14B8A6 50%, #06B6D4 72%, transparent 76%)",
     },
     {
-      icon: Users,
+      icon: <Users size={30} strokeWidth={1.8} />,
       title: "Relationship Building",
-      description: "Free your team to focus on personal connections"
-    }
+      description: "Free your team to focus on personal connections",
+      color:    "#6366F1",
+      colorMid: "#818CF8",
+      colorLt:  "#C7D2FE",
+      glow:     "rgba(99,102,241,0.5)",
+      // indigo/purple — matches reference item 4 (top-right arc)
+      arcGradient: "conic-gradient(from 300deg, transparent 0%, #6366F1 15%, #818CF8 55%, transparent 60%)",
+    },
   ];
 
   return (
     <section
-      ref={sectionRef}
-      className="overflow-hidden relative w-full py-16 md:py-24"
-      style={{
-        background: 'linear-gradient(135deg, #1e3a8a 0%, #1e293b 50%, #1e3a8a 100%)',
-      }}
       id="specifications"
+      className="overflow-hidden relative w-full flex items-center justify-center py-8 md:py-10"
+      style={{ minHeight: "100vh", background: "linear-gradient(135deg,#060b24 0%,#0d1340 50%,#060b24 100%)" }}
     >
-      {/* Animated gradient background - Same as HumanoidSection */}
-      <div className="absolute inset-0">
-        <motion.div
-          className="absolute top-0 left-0 w-full h-full"
-          animate={{
-            background: [
-              'radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
-              'radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
-              'radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
-            ]
-          }}
-          transition={{ duration: 10, repeat: Infinity }}
+      <style>{`
+        @keyframes hero-pulse { 0%,100%{opacity:.8;transform:scale(1)} 50%{opacity:.3;transform:scale(1.4)} }
+      `}</style>
+
+      {/* ── Radial glows — Hero identical ── */}
+      <div className="absolute inset-0 pointer-events-none">
+        <motion.div className="absolute inset-0"
+          animate={{ background: [
+            "radial-gradient(ellipse 55% 55% at 15% 50%,rgba(59,130,246,0.22) 0%,transparent 65%)",
+            "radial-gradient(ellipse 55% 55% at 20% 55%,rgba(99,102,241,0.28) 0%,transparent 65%)",
+            "radial-gradient(ellipse 55% 55% at 15% 50%,rgba(59,130,246,0.22) 0%,transparent 65%)",
+          ]}}
+          transition={{ duration: 8, repeat: Infinity }}
+        />
+        <motion.div className="absolute inset-0"
+          animate={{ background: [
+            "radial-gradient(ellipse 50% 60% at 85% 40%,rgba(108,63,197,0.25) 0%,transparent 65%)",
+            "radial-gradient(ellipse 50% 60% at 80% 45%,rgba(139,92,246,0.30) 0%,transparent 65%)",
+            "radial-gradient(ellipse 50% 60% at 85% 40%,rgba(108,63,197,0.25) 0%,transparent 65%)",
+          ]}}
+          transition={{ duration: 8, repeat: Infinity, delay: 2 }}
         />
       </div>
 
-      {/* Grid overlay - Same as HumanoidSection */}
-      <div 
-        className="absolute inset-0 opacity-[0.05]"
+      {/* Grid */}
+      <div className="absolute inset-0 opacity-[0.045] pointer-events-none"
         style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)',
-          backgroundSize: '50px 50px'
+          backgroundImage: "linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px)",
+          backgroundSize: "60px 60px",
         }}
       />
 
-      {/* Floating particles - Same as HumanoidSection */}
-      {!isMobile && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(20)].map((_, i) => (
-            <FloatingParticle
-              key={i}
-              delay={i * 0.4}
-              duration={6 + i * 0.3}
-              initialX={Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000)}
-              initialY={Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800)}
-              size={Math.random() * 3 + 1}
-            />
-          ))}
-        </div>
-      )}
+      {/* Stars */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {Array.from({ length: 50 }).map((_, i) => (
+          <div key={i} className="absolute rounded-full bg-white"
+            style={{
+              width: `${Math.random() * 2 + 1}px`, height: `${Math.random() * 2 + 1}px`,
+              left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%`,
+              opacity: Math.random() * 0.55 + 0.08,
+              animation: `hero-pulse ${2 + Math.random() * 4}s ease-in-out infinite`,
+              animationDelay: `${Math.random() * 5}s`,
+            }}
+          />
+        ))}
+      </div>
 
       <div className="container px-6 lg:px-12 mx-auto relative z-10">
-        {/* Header Section with 3D Transform */}
-        <div className="max-w-4xl mb-20" style={{ perspective: "1500px" }}>
-          
 
-          <h2
-            ref={titleRef}
-            className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-8 leading-tight"
-            style={{
-              textShadow: "0 10px 40px rgba(0, 0, 0, 0.5)",
-              transform: `translateZ(100px)`,
-            }}
-          >
-            Built to
-            <span className="block bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent mt-2">
-              Empower Teams
-            </span>
-          </h2>
+        {/* ══════════ TOP: TWO COLUMN ══════════ */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 items-center mb-8 lg:mb-10">
 
-          {/* Hero statement with 3D depth */}
-          <div 
-            ref={heroTextRef}
-            className="mb-10"
-            style={{
-              textShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-            }}
-          >
-            <h3 className="text-2xl sm:text-3xl lg:text-4xl font-bold leading-tight mb-2">
-              <span className="block text-white mb-2">
-                Your virtual agents work
+          {/* ── LEFT TEXT ── */}
+          <div className="flex flex-col gap-3">
+
+            {/* Badge pill */}
+            <motion.div
+              initial={{ opacity: 0, y: -40, filter: "blur(8px)" }}
+              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full w-fit"
+              style={{
+                border: "1.5px solid rgba(99,102,241,0.5)",
+                background: "rgba(99,102,241,0.08)",
+                backdropFilter: "blur(10px)",
+              }}
+            >
+              <Users size={14} style={{ color: "#818CF8" }} />
+              <span className="landing-eyebrow font-bold tracking-[0.22em] uppercase"
+                style={{ color:"#818CF8" }}>
+                Built for Modern Teams
               </span>
-              <span className="block text-blue-200 mb-2">
-                alongside your team,
-              </span>
-              <span className="block text-white">
-                not instead of it.
-              </span>
-            </h3>
+            </motion.div>
+
+            {/* Main heading — single line */}
+            <motion.div
+              initial={{ opacity: 0, x: 60, filter: "blur(10px)" }}
+              whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 1.0, ease: "easeOut", delay: 0.15 }}
+            >
+              <h2 className="landing-title"
+                style={{ textShadow:"0 8px 40px rgba(0,0,0,0.5)" }}>
+                <span className="font-heading text-white">Built to </span>
+                <br />
+                <span className="font-heading"
+                 style={{
+                  background: "linear-gradient(90deg,#818CF8 0%,#60A5FA 50%,#a78bfa 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  backgroundClip: "text",
+                }}>Empower Teams</span>
+              </h2>
+            </motion.div>
+
+            {/* Hero statement */}
+            <motion.div
+              initial={{ opacity: 0, y: 50, filter: "blur(8px)" }}
+              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.9, ease: "easeOut", delay: 0.3 }}
+            >
+              <h3 className="landing-subtitle">
+                <span className="text-white">Your virtual agents work alongside your team,{" "}</span>
+                <span style={{ color:"#60A5FA" }}>not</span>
+                <span className="text-white"> instead of it.</span>
+              </h3>
+            </motion.div>
+
+            {/* Description */}
+            <motion.p
+              initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
+              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.85, ease: "easeOut", delay: 0.45 }}
+              className="landing-description"
+              style={{ color:"rgba(255,255,255,0.75)" }}>
+              By handling lead qualification, scheduling, and follow-ups, they help agents focus on what they do best:{" "}
+              <span style={{ color:"#60A5FA", fontWeight:700 }}>build relationships and close deals.</span>
+            </motion.p>
           </div>
 
-          <p
-            ref={subtitleRef}
-            className="text-base md:text-lg lg:text-xl text-white/90 leading-relaxed max-w-2xl font-medium"
-            style={{
-              textShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-            }}
+          {/* ── RIGHT: IMAGE ── */}
+          <motion.div
+            initial={{ opacity: 0, x: -80, scale: 0.92, filter: "blur(12px)" }}
+            whileInView={{ opacity: 1, x: 0, scale: 1, filter: "blur(0px)" }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 1.1, ease: "easeOut", delay: 0.15 }}
+            className="relative w-full flex items-center justify-center"
           >
-            By handling lead qualification, scheduling, and follow-ups, they help agents focus on what they do best:{" "}
-            <span className="text-white font-bold">build relationships and close deals.</span>
-          </p>
+            {/* glow behind */}
+            <motion.div
+              className="absolute rounded-full pointer-events-none"
+              style={{
+                width:"80%", height:"80%", top:"10%", left:"10%",
+                background:"radial-gradient(circle,rgba(99,102,241,0.35) 0%,rgba(59,130,246,0.2) 45%,transparent 70%)",
+                filter:"blur(50px)",
+              }}
+              animate={{ scale:[1,1.1,1], opacity:[0.55,0.9,0.55] }}
+              transition={{ duration:6, repeat:Infinity }}
+            />
+
+            {/* ════════════════════════════════════
+                IMAGE — replace src with your file:
+                  import SpecsImg from "/path/to/img.png";
+                  src={SpecsImg}
+                ════════════════════════════════════ */}
+            <img
+              src={SpecsImg}
+              alt="AI Agent Dashboard"
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+              onContextMenu={e => e.preventDefault()}
+              className="w-full h-auto relative z-10 select-none"
+              style={{
+                maxWidth: 460,
+                filter: "drop-shadow(0 30px 70px rgba(99,102,241,0.5))",
+                pointerEvents: "none",
+                userSelect: "none",
+              } as React.CSSProperties}
+            />
+          </motion.div>
         </div>
 
-        {/* Feature Cards - 3D Grid Layout */}
-        <div 
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8" 
-          style={{ perspective: "2000px" }}
-        >
-          {features.map((feature, index) => {
-            const Icon = feature.icon;
-            
-            return (
-              <motion.div
-                key={index}
-                ref={(el) => (cardsRef.current[index] = el)}
-                className="group relative"
-                style={{
-                  transformStyle: "preserve-3d",
-                }}
-                whileHover={{ scale: 1.05, z: 50 }}
-                transition={{ duration: 0.3 }}
-              >
-                <div
-                  className="relative backdrop-blur-2xl rounded-3xl overflow-hidden transition-all duration-700 cursor-pointer h-full"
+        {/* ══════════ BOTTOM: 4 FEATURE ICONS ══════════ */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-0 relative">
+
+          {/* subtle vertical separators */}
+          {[1,2,3].map(i => (
+            <div key={i} className="absolute hidden md:block top-0 bottom-0 w-px"
+              style={{
+                left:`${i * 25}%`,
+                background:"linear-gradient(180deg,transparent,rgba(255,255,255,0.07) 30%,rgba(255,255,255,0.07) 70%,transparent)",
+              }}
+            />
+          ))}
+
+          {features.map((f, index) => (
+            <motion.div
+              key={index}
+              className="group flex flex-col items-center text-center px-4 py-4"
+              initial={{ opacity: 0, y: 60, filter: "blur(8px)" }}
+              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.7, ease: "easeOut", delay: index * 0.12 }}
+              whileHover={{ y: -6 }}
+            >
+              {/* ── Static arc ring icon — matches reference image ── */}
+              <div className="relative mb-3" style={{ width: 78, height: 78 }}>
+
+                {/* Outer glow layer */}
+                <div className="absolute inset-0 rounded-full"
                   style={{
-                    background: "rgba(255, 255, 255, 0.05)",
-                    border: "2px solid rgba(255, 255, 255, 0.1)",
-                    boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
+                    boxShadow: `0 0 22px ${f.glow}, 0 0 44px ${f.glow.replace("0.55","0.2")}`,
+                  }}
+                />
+
+                {/* Arc ring — conic gradient partial arc, static */}
+                <div className="absolute inset-0 rounded-full"
+                  style={{
+                    background: f.arcGradient,
+                    padding: 0,
+                  }}
+                />
+
+                {/* Inner dark disc — creates the "ring" cutout */}
+                <div className="absolute rounded-full flex items-center justify-center"
+                  style={{
+                    inset: 7,
+                    background: "radial-gradient(circle at 40% 35%, #0e1545, #060b24)",
+                    boxShadow: `inset 0 0 14px ${f.glow.replace("0.55","0.35")}`,
                   }}
                 >
-                  {/* Animated gradient overlay */}
-                  <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-                    style={{
-                      background: "linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))",
-                    }}
-                  ></div>
-
-                  {/* Shine effect */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
-                    <div
-                      className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1500"
-                      style={{
-                        background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
-                      }}
-                    ></div>
-                  </div>
-
-                  <div className="relative p-8 flex flex-col h-full">
-                    {/* 3D Icon Badge */}
-                    <motion.div
-                      className="mb-6"
-                      style={{
-                        transformStyle: "preserve-3d",
-                        transform: "translateZ(40px)",
-                      }}
-                      whileHover={{ scale: 1.15, rotate: 360 }}
-                      transition={{ duration: 0.6 }}
-                    >
-                      <div
-                        className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-2xl"
-                        style={{
-                          background: "rgba(255, 255, 255, 0.95)",
-                          border: "3px solid rgba(255, 255, 255, 0.2)",
-                          boxShadow: "0 10px 40px rgba(59, 130, 246, 0.4), inset 0 0 20px rgba(255,255,255,0.1)",
-                        }}
-                      >
-                        <Icon 
-                          className="w-8 h-8 text-blue-900" 
-                          strokeWidth={2.5}
-                        />
-                      </div>
-                    </motion.div>
-
-                    {/* Content */}
-                    <div className="flex-1" style={{ transform: "translateZ(20px)" }}>
-                      <h3
-                        className="text-lg md:text-xl font-bold text-white leading-tight mb-3"
-                        style={{
-                          textShadow: "0 4px 20px rgba(0, 0, 0, 0.4)",
-                        }}
-                      >
-                        {feature.title}
-                      </h3>
-                      <p className="text-sm md:text-base text-white/85 leading-relaxed">
-                        {feature.description}
-                      </p>
-                    </div>
-
-                    {/* Corner accent with pulse */}
-                    <div 
-                      className="absolute top-4 right-4 w-2.5 h-2.5 rounded-full bg-white/40 animate-pulse"
-                      style={{ animationDuration: '2s' }}
-                    ></div>
-                  </div>
-
-                  {/* Bottom accent line with glow */}
-                  <div
-                    className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-1000 ease-out"
-                    style={{
-                      background: "linear-gradient(90deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.3))",
-                      boxShadow: "0 0 20px rgba(255, 255, 255, 0.5)",
-                    }}
-                  ></div>
+                  {/* Icon */}
+                  <span style={{ color: f.colorLt, display:"flex", transform:"scale(0.72)" }}>
+                    {f.icon}
+                  </span>
                 </div>
-              </motion.div>
-            );
-          })}
+              </div>
+
+              {/* Title */}
+              <h3 className="landing-card-title text-white mb-1.5">
+                {f.title}
+              </h3>
+
+              {/* Description */}
+              <p className="landing-card-description"
+                style={{ color:"rgba(255,255,255,0.65)", maxWidth:220 }}>
+                {f.description}
+              </p>
+            </motion.div>
+          ))}
         </div>
+
       </div>
     </section>
   );

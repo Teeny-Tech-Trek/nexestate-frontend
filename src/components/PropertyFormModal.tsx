@@ -855,16 +855,16 @@ const PropertyFormModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-5xl max-h-[92vh] overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white border-gray-500 shadow-2xl p-2">
+      <DialogContent className="overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white border-gray-500 shadow-2xl p-2" style={{ maxWidth: "min(1024px, calc(100vw - 24px))", maxHeight: "min(92vh, calc(100vh - 24px))" }}>
         {/* Header Section */}
-        <div className="px-8 pt-8 pb-6 border-b border-slate-800/50 bg-gradient-to-r from-slate-900/50 to-transparent">
+        <div className="border-b border-slate-800/50 bg-gradient-to-r from-slate-900/50 to-transparent" style={{ padding: "clamp(18px, 2.4vw, 32px) clamp(18px, 2.4vw, 32px) clamp(14px, 2vw, 24px)" }}>
           <DialogHeader>
-            <div className="flex items-start justify-between">
-              <div className="space-y-2">
-                <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent">
+            <div className="flex items-start justify-between gap-3">
+              <div className="space-y-1.5 min-w-0">
+                <DialogTitle className="font-bold bg-gradient-to-r from-white via-slate-200 to-slate-400 bg-clip-text text-transparent" style={{ fontSize: "clamp(1.25rem, 2.2vw, 1.85rem)" }}>
                   {mode === "add" ? "Add New Property" : "Edit Property"}
                 </DialogTitle>
-                <DialogDescription className="text-slate-400 text-base">
+                <DialogDescription className="text-slate-400" style={{ fontSize: "clamp(0.85rem, 1.05vw, 1rem)" }}>
                   {mode === "add"
                     ? "Create a comprehensive property listing with analytics and insights"
                     : "Update property information and market data"}

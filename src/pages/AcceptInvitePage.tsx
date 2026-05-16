@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "https://api.estate.techtrekkers.ai/api";
+  import.meta.env.VITE_API_URL || "https://api.nexestate.techtrekkers.ai/api";
 
 const AcceptInvitePage: React.FC = () => {
   const [firstName, setFirstName] = useState<string>("");
@@ -103,13 +103,14 @@ const AcceptInvitePage: React.FC = () => {
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    width: "400px",
-    margin: "80px auto",
+    width: "min(420px, calc(100vw - 32px))",
+    margin: "clamp(40px, 8vh, 96px) auto",
     background: "#121212",
     color: "#fff",
-    padding: "30px",
+    padding: "clamp(18px, 3vw, 32px)",
     borderRadius: "12px",
     boxShadow: "0 0 10px rgba(0,0,0,0.3)",
+    boxSizing: "border-box",
   },
   form: {
     display: "flex",
@@ -119,6 +120,7 @@ const styles: Record<string, React.CSSProperties> = {
   message: {
     marginTop: "10px",
     color: "#00e676",
+    wordBreak: "break-word",
   },
 };
 

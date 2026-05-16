@@ -1,526 +1,423 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
-import { Check, Star, Zap, Crown } from "lucide-react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { motion } from "framer-motion";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import React, { useRef } from "react";
+import { Check, Star } from "lucide-react";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import FAQ from "@/components/FAQ";
 
-gsap.registerPlugin(ScrollTrigger);
+const PLANS = [
+  {
+    name: "Starter",
+    imgSrc: "/Website-Images/Pricing-Images/starter.png",
+    accentColor: "#2f80ff",
+    borderColor: "rgba(47,128,255,0.74)",
+    cardGlow: "0 0 42px rgba(47,128,255,0.26)",
+    popular: false,
+    price: "$49",
+    priceLabel: "/month",
+    isCustom: false,
+    description: "Perfect for individual agents getting started",
+    features: [
+      "1 Virtual Avatar",
+      "Up to 100 leads/month",
+      "Basic property management",
+      "Email support",
+      "Standard integrations",
+      "Basic analytics",
+      "1% commission on closed deals",
+    ],
+    buttonText: "Start Free Trial",
+    btnFilled: false,
+  },
+  {
+    name: "Professional",
+    imgSrc: "/Website-Images/Pricing-Images/professional.png",
+    accentColor: "#a94cff",
+    borderColor: "rgba(169,76,255,0.88)",
+    cardGlow: "0 0 56px rgba(169,76,255,0.44)",
+    popular: true,
+    price: "$99",
+    priceLabel: "/month",
+    isCustom: false,
+    description: "Ideal for growing real estate teams",
+    features: [
+      "3 Virtual Avatars",
+      "Up to 500 leads/month",
+      "Advanced property management",
+      "Priority support",
+      "All CRM integrations",
+      "Advanced analytics & reporting",
+      "Team collaboration tools",
+      "Custom avatar training",
+      "1% commission on closed deals",
+    ],
+    buttonText: "Get Started",
+    btnFilled: true,
+  },
+  {
+    name: "Enterprise",
+    imgSrc: "/Website-Images/Pricing-Images/enterprise.png",
+    accentColor: "#28dce8",
+    borderColor: "rgba(40,220,232,0.74)",
+    cardGlow: "0 0 42px rgba(40,220,232,0.28)",
+    popular: false,
+    price: "Custom",
+    priceLabel: "",
+    isCustom: true,
+    description: "For large agencies and enterprises",
+    features: [
+      "Unlimited Virtual Avatars",
+      "Unlimited leads",
+      "White-label solution",
+      "Dedicated account manager",
+      "Custom integrations",
+      "Advanced security & compliance",
+      "Multi-location support",
+      "Custom reporting",
+      "Volume-based commission rates",
+    ],
+    buttonText: "Contact Sales",
+    btnFilled: false,
+  },
+];
 
-const Pricing = () => {
-  const sectionRef = useRef(null);
-  const badgeRef = useRef(null);
-  const titleRef = useRef(null);
-  const descRef = useRef(null);
-  const cardsRef = useRef([]);
-  const faqTitleRef = useRef(null);
-  const faqDescRef = useRef(null);
-  const faqItemsRef = useRef([]);
-  const [isMobile, setIsMobile] = useState(false);
-  
-  // Use scroll detection to trigger animations only when visible
-  const { isVisible, hasAnimated } = useScrollAnimation({
-    threshold: 0.15,
-    rootMargin: '50px',
-  });
+const PARTICLES = Array.from({ length: 45 }, (_, i) => ({
+  id: i,
+  size: Math.random() * 2.1 + 0.8,
+  left: Math.random() * 100,
+  top: Math.random() * 100,
+  opacity: Math.random() * 0.36 + 0.08,
+  duration: 2.4 + Math.random() * 3.8,
+  delay: Math.random() * 5,
+}));
 
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
+function use3DTilt(deg = 4) {
+  const ref = useRef<HTMLDivElement>(null);
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const sx = useSpring(mx, { stiffness: 150, damping: 22 });
+  const sy = useSpring(my, { stiffness: 150, damping: 22 });
+  const rotX = useTransform(sy, [-0.5, 0.5], [deg, -deg]);
+  const rotY = useTransform(sx, [-0.5, 0.5], [-deg, deg]);
 
-  // Only initialize animations when element is visible
-  useEffect(() => {
-    if (!isVisible) return;
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = ref.current?.getBoundingClientRect();
+    if (!rect) return;
+    mx.set((e.clientX - rect.left) / rect.width - 0.5);
+    my.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
 
-    // Animate badge with 3D flip - Simplified for performance
-    gsap.fromTo(
-      badgeRef.current,
-      { opacity: 0, scale: 0.8, rotationY: -90 },
-      {
-        opacity: 1,
-        scale: 1,
-        rotationY: 0,
-        duration: 0.6,
-        ease: "back.out(1.2)",
-      }
-    );
+  const onLeave = () => {
+    mx.set(0);
+    my.set(0);
+  };
 
-    // Animate title with reduced 3D complexity
-    gsap.fromTo(
-      titleRef.current,
-      { opacity: 0, y: 80 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        delay: 0.1,
-        ease: "power3.out",
-      }
-    );
+  return { ref, rotX, rotY, onMove, onLeave };
+}
 
-    // Animate description
-    gsap.fromTo(
-      descRef.current,
-      { opacity: 0, y: 20 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
-        delay: 0.2,
-        ease: "power3.out",
-      }
-    );
-
-    // Stagger animation for pricing cards - Reduced 3D for better performance
-    cardsRef.current.forEach((card, index) => {
-      if (card) {
-        gsap.fromTo(
-          card,
-          {
-            opacity: 0,
-            rotateX: 25,
-            y: 40,
-          },
-          {
-            opacity: 1,
-            rotateX: 0,
-            y: 0,
-            duration: 0.6,
-            delay: 0.15 + index * 0.08,
-            ease: "power3.out",
-          }
-        );
-      }
-    });
-
-    // Animation for FAQ title
-    gsap.fromTo(
-      faqTitleRef.current,
-      { opacity: 0, y: 40 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
-        ease: "power3.out",
-      }
-    );
-
-    // Animation for FAQ description
-    gsap.fromTo(
-      faqDescRef.current,
-      { opacity: 0, y: 20 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        delay: 0.1,
-        ease: "power3.out",
-      }
-    );
-
-    // Stagger animation for FAQ items
-    gsap.fromTo(
-      faqItemsRef.current,
-      { opacity: 0, y: 30 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.5,
-        stagger: 0.1,
-        ease: "power3.out",
-      }
-    );
-
-    // Cleanup: Kill ScrollTriggers on unmount to prevent memory leaks
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, [isVisible]);
-
-  // Floating particles component
-  const FloatingParticle = ({ delay, duration, initialX, initialY, size = 2 }) => (
-    <motion.div
-      className="absolute rounded-full bg-white/20"
-      style={{ width: size, height: size }}
-      initial={{ x: initialX, y: initialY, opacity: 0 }}
-      animate={{
-        x: [initialX, initialX + 50, initialX],
-        y: [initialY, initialY - 100, initialY],
-        opacity: [0, 0.6, 0],
-      }}
-      transition={{
-        duration,
-        delay,
-        repeat: Infinity,
-        ease: "easeInOut",
-      }}
-    />
-  );
-
-  const plans = [
-    {
-      name: "Starter",
-      price: "$49",
-      period: "/month",
-      description: "Perfect for individual agents getting started",
-      icon: Zap,
-      popular: false,
-      features: [
-        "1 Virtual Avatar", 
-        "Up to 100 leads/month",
-        "Basic property management",
-        "Email support",
-        "Standard integrations",
-        "Basic analytics",
-        "1% commission on closed deals"
-      ],
-      buttonText: "Start Free Trial"
-    },
-    {
-      name: "Professional", 
-      price: "$99",
-      period: "/month",
-      description: "Ideal for growing real estate teams",
-      icon: Star,
-      popular: true,
-      features: [
-        "3 Virtual Avatars",
-        "Up to 500 leads/month", 
-        "Advanced property management",
-        "Priority support",
-        "All CRM integrations",
-        "Advanced analytics & reporting",
-        "Team collaboration tools",
-        "Custom avatar training",
-        "1% commission on closed deals"
-      ],
-      buttonText: "Get Started"
-    },
-    {
-      name: "Enterprise",
-      price: "Custom",
-      period: "",
-      description: "For large agencies and enterprises", 
-      icon: Crown,
-      popular: false,
-      features: [
-        "Unlimited Virtual Avatars",
-        "Unlimited leads",
-        "White-label solution",
-        "Dedicated account manager",
-        "Custom integrations",
-        "Advanced security & compliance",
-        "Multi-location support", 
-        "Custom reporting",
-        "Volume-based commission rates"
-      ],
-      buttonText: "Contact Sales"
-    }
-  ];
+const PricingCard: React.FC<{
+  plan: (typeof PLANS)[0];
+  index: number;
+}> = ({ plan, index }) => {
+  const tilt = use3DTilt(plan.popular ? 3 : 4);
 
   return (
-    <div 
-      ref={sectionRef}
-      className="min-h-screen overflow-hidden relative"
+    <motion.div
+      ref={tilt.ref}
+      onMouseMove={tilt.onMove}
+      onMouseLeave={tilt.onLeave}
+      initial={{ opacity: 0, y: 60, x: 40, scale: 0.92, filter: "blur(10px)" }}
+      whileInView={{ opacity: 1, y: 0, x: 0, scale: 1, filter: "blur(0px)" }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 1.0, ease: "easeOut", delay: 0.25 + index * 0.15 }}
       style={{
-        background: 'linear-gradient(135deg, #1e3a8a 0%, #1e293b 50%, #1e3a8a 100%)',
+        rotateX: tilt.rotX,
+        rotateY: tilt.rotY,
+        transformStyle: "preserve-3d",
       }}
-      id="pricing"
+      className="relative h-full"
     >
-      {/* Animated gradient background - Same as HumanoidSection */}
-      <div className="absolute inset-0">
+      <div
+        className="relative flex h-full flex-col overflow-visible px-4 pb-4 pt-3 sm:px-5 sm:pb-5"
+        style={{
+          minHeight: "640px",
+          borderRadius: "26px",
+          background:
+            plan.name === "Enterprise"
+              ? "linear-gradient(180deg,rgba(0,28,32,0.88),rgba(1,13,26,0.97) 52%,rgba(0,12,20,0.98))"
+              : "linear-gradient(180deg,rgba(5,17,43,0.9),rgba(4,9,28,0.98) 52%,rgba(3,7,22,0.99))",
+          border: `2px solid ${plan.borderColor}`,
+          boxShadow: `${plan.cardGlow}, inset 0 1px 0 rgba(255,255,255,0.13), 0 24px 70px rgba(0,0,0,0.54)`,
+        }}
+      >
+        {plan.popular && (
+          <div
+            className="absolute left-1/2 top-[-21px] z-30 flex -translate-x-1/2 items-center gap-2 px-8 py-2 text-sm font-black text-white"
+            style={{
+              borderRadius: "8px",
+              background: "linear-gradient(180deg,#8d35ff,#5d13ca)",
+              border: "1.5px solid rgba(207,151,255,0.72)",
+              boxShadow: "0 0 24px rgba(169,76,255,0.75)",
+              clipPath:
+                "polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            <Star className="h-5 w-5 fill-yellow-300 text-yellow-300" />
+            Most Popular
+          </div>
+        )}
+
+        <div
+          className="relative mb-1 flex h-[120px] items-end justify-center sm:h-[140px] lg:h-[150px]"
+        >
+          <div
+            className="absolute inset-x-2 bottom-2 h-16 rounded-full blur-2xl"
+            style={{ background: `${plan.accentColor}36` }}
+          />
+          <img
+            src={plan.imgSrc}
+            alt={`${plan.name} plan`}
+            draggable={false}
+            className="relative z-10 max-h-full w-full object-contain"
+            style={{
+              transform: plan.popular ? "scale(1.04)" : "scale(1.16)",
+              filter: `drop-shadow(0 0 26px ${plan.accentColor}82) drop-shadow(0 18px 24px rgba(0,0,0,0.62))`,
+            }}
+          />
+        </div>
+
+        <h3 className="hf landing-subtitle mb-2 text-center text-white">
+          {plan.name}
+        </h3>
+
+        <p className="bf landing-card-description mx-auto mb-4 min-h-[44px] max-w-[280px] text-center text-white/75">
+          {plan.description}
+        </p>
+
+        <div
+          className="mb-3 flex h-[54px] items-center justify-center gap-1 rounded-lg"
+          style={{
+            background:
+              plan.name === "Enterprise"
+                ? "linear-gradient(90deg,rgba(1,58,64,0.58),rgba(6,32,39,0.66))"
+                : "linear-gradient(90deg,rgba(14,54,126,0.58),rgba(11,20,58,0.72))",
+            border: "1px solid rgba(255,255,255,0.08)",
+            boxShadow: `inset 0 0 32px ${plan.accentColor}14`,
+          }}
+        >
+          {plan.isCustom ? (
+            <span
+              className="hf font-black leading-none"
+              style={{
+                color: "#b9fbff",
+                fontSize: "clamp(1.6rem, 2.4vw, 2.1rem)",
+                textShadow: `0 0 22px ${plan.accentColor}`,
+              }}
+            >
+              Custom
+            </span>
+          ) : (
+            <>
+              <span
+                className="hf font-black leading-none text-white"
+                style={{
+                  color: plan.name === "Professional" ? "#f1d9ff" : "#dbe9ff",
+                  fontSize: "clamp(1.7rem, 2.6vw, 2.3rem)",
+                  textShadow: `0 0 24px ${plan.accentColor}`,
+                }}
+              >
+                {plan.price}
+              </span>
+              <span className="bf landing-meta mt-5 font-medium text-white">
+                {plan.priceLabel}
+              </span>
+            </>
+          )}
+        </div>
+
+        <ul className="bf landing-card-description mb-5 flex flex-1 flex-col gap-2 text-white">
+          {plan.features.map((feature) => (
+            <li key={feature} className="flex items-start gap-2.5">
+              <span
+                className="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full"
+                style={{
+                  background: plan.accentColor,
+                  boxShadow: `0 0 10px ${plan.accentColor}`,
+                }}
+              >
+                <Check className="h-3 w-3 text-white" strokeWidth={3} />
+              </span>
+              <span className="leading-snug">{feature}</span>
+            </li>
+          ))}
+        </ul>
+
+        <motion.a
+          href="/login"
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          className="bf block h-[52px] w-full rounded-xl px-4 text-center font-black leading-[52px] text-white"
+          style={
+            plan.btnFilled
+              ? {
+                  fontSize: "clamp(0.95rem, 1.1vw, 1.1rem)",
+                  background:
+                    "linear-gradient(90deg,#8a2cff 0%,#7f35f0 48%,#33185c 100%)",
+                  border: "2px solid rgba(226,159,255,0.92)",
+                  boxShadow:
+                    "0 0 28px rgba(169,76,255,0.75), inset 0 0 18px rgba(255,255,255,0.16)",
+                }
+              : {
+                  fontSize: "clamp(0.95rem, 1.1vw, 1.1rem)",
+                  background: "rgba(0,0,0,0.14)",
+                  border: `2px solid ${plan.accentColor}`,
+                  boxShadow: `0 0 22px ${plan.accentColor}73, inset 0 0 18px ${plan.accentColor}1f`,
+                }
+          }
+        >
+          {plan.buttonText}
+        </motion.a>
+      </div>
+    </motion.div>
+  );
+};
+
+const Pricing: React.FC = () => {
+  return (
+    <div
+      id="pricing"
+      className="relative w-full overflow-hidden"
+      style={{
+        background:
+          "linear-gradient(135deg,#060b24 0%,#0d1340 50%,#060b24 100%)",
+      }}
+    >
+      <style>{`
+        @keyframes shimmer-p { 0%,100% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } }
+        @keyframes star-blink { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.45); opacity: .45; } }
+        @media (max-width: 1023px) {
+          #pricing .pricing-grid { max-width: 520px; }
+          #pricing .pricing-grid > div { min-height: auto; }
+        }
+      `}</style>
+
+      <div className="absolute inset-0 pointer-events-none">
         <motion.div
-          className="absolute top-0 left-0 w-full h-full"
+          className="absolute inset-0"
           animate={{
             background: [
-              'radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
-              'radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
-              'radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
-            ]
+              "radial-gradient(ellipse 55% 55% at 15% 50%,rgba(59,130,246,0.22) 0%,transparent 65%)",
+              "radial-gradient(ellipse 55% 55% at 20% 55%,rgba(99,102,241,0.28) 0%,transparent 65%)",
+              "radial-gradient(ellipse 55% 55% at 15% 50%,rgba(59,130,246,0.22) 0%,transparent 65%)",
+            ],
           }}
-          transition={{ duration: 10, repeat: Infinity }}
+          transition={{ duration: 8, repeat: Infinity }}
+        />
+        <motion.div
+          className="absolute inset-0"
+          animate={{
+            background: [
+              "radial-gradient(ellipse 50% 60% at 85% 40%,rgba(108,63,197,0.25) 0%,transparent 65%)",
+              "radial-gradient(ellipse 50% 60% at 80% 45%,rgba(139,92,246,0.30) 0%,transparent 65%)",
+              "radial-gradient(ellipse 50% 60% at 85% 40%,rgba(108,63,197,0.25) 0%,transparent 65%)",
+            ],
+          }}
+          transition={{ duration: 8, repeat: Infinity, delay: 2 }}
         />
       </div>
 
-      {/* Grid overlay - Same as HumanoidSection */}
-      <div 
-        className="absolute inset-0 opacity-[0.05]"
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.045]"
         style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)',
-          backgroundSize: '50px 50px'
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px)",
+          backgroundSize: "60px 60px",
         }}
       />
 
-      {/* Floating particles - Same as HumanoidSection */}
-      {!isMobile && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(20)].map((_, i) => (
-            <FloatingParticle
-              key={i}
-              delay={i * 0.4}
-              duration={6 + i * 0.3}
-              initialX={Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000)}
-              initialY={Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800)}
-              size={Math.random() * 3 + 1}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {PARTICLES.map((particle) => (
+          <div
+            key={particle.id}
+            className="absolute rounded-full bg-white"
+            style={{
+              width: `${particle.size}px`,
+              height: `${particle.size}px`,
+              left: `${particle.left}%`,
+              top: `${particle.top}%`,
+              opacity: particle.opacity,
+              animation: `star-blink ${particle.duration}s ease-in-out infinite`,
+              animationDelay: `${particle.delay}s`,
+            }}
+          />
+        ))}
+      </div>
+
+      <div className="relative z-10 mx-auto flex w-full flex-col items-center justify-center" style={{ minHeight: "100vh", maxWidth: "min(1500px, 95vw)", padding: "clamp(28px, 4vh, 56px) clamp(14px, 3vw, 40px)" }}>
+        <div className="mb-5 text-center lg:mb-6" style={{ perspective: "1400px" }}>
+          <div
+            className="bf landing-eyebrow mb-3 inline-flex items-center gap-2 rounded-full px-4 py-2 font-bold text-white"
+            style={{
+              background: "linear-gradient(90deg,rgba(91,25,176,0.72),rgba(25,46,112,0.72))",
+              border: "1.5px solid rgba(155,91,255,0.7)",
+              boxShadow: "0 0 24px rgba(119,61,255,0.48)",
+            }}
+          >
+            <Star className="h-4 w-4 fill-[#c563ff] text-[#c563ff]" />
+            Flexible Plans for Every Need
+          </div>
+
+          <motion.h2
+            initial={{ opacity: 0, y: -60, filter: "blur(10px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 1.1, ease: "easeOut" }}
+            className="hf landing-title mx-auto max-w-[1100px] text-center text-white"
+            style={{ textShadow: "0 7px 26px rgba(0,0,0,0.55)" }}
+          >
+            <span>Choose the Plan That</span>{" "}
+            <span
+              style={{
+                background:
+                  "linear-gradient(90deg,#d25dff 0%,#8c55ff 43%,#35c9ff 100%)",
+                backgroundSize: "200% 100%",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                animation: "shimmer-p 4s ease infinite",
+                filter: "drop-shadow(0 0 18px rgba(91,160,255,0.35))",
+              }}
+            >
+              <br />
+              Drives Your Success
+            </span>
+          </motion.h2>
+
+          <motion.p
+            initial={{ opacity: 0, y: 40, filter: "blur(8px)" }}
+            whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.9, ease: "easeOut", delay: 0.2 }}
+            className="bf landing-description mx-auto mt-3 max-w-[700px] text-center text-white/80"
+          >
+            Powerful tools. Smart automation. Better deals. Pick the plan that fits your goals.
+          </motion.p>
+        </div>
+
+        <div
+          className="pricing-grid mx-auto grid w-full grid-cols-1 items-end gap-5 lg:grid-cols-3 lg:gap-6"
+          style={{ perspective: "2000px" }}
+        >
+          {PLANS.map((plan, i) => (
+            <PricingCard
+              key={plan.name}
+              plan={plan}
+              index={i}
             />
           ))}
         </div>
-      )}
-
-      {/* Header */}
-      <div className="container mx-auto px-6 lg:px-12 py-16 md:py-24 text-center relative z-10" style={{ perspective: "1500px" }}>
-      
-        
-        <h1 
-          ref={titleRef}
-          className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-8 leading-tight"
-          style={{
-            textShadow: "0 10px 40px rgba(0, 0, 0, 0.5)",
-            transform: `translateZ(100px)`,
-          }}
-        >
-          Choose Your
-          <span className="block bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent mt-2">
-            Plan
-          </span>
-        </h1>
-        
-        <p 
-          ref={descRef}
-          className="text-base md:text-lg lg:text-xl text-white/90 leading-relaxed max-w-3xl mx-auto font-medium"
-          style={{
-            textShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-          }}
-        >
-          Start converting more leads with AI-powered virtual sales agents. 
-          All plans include our 1% commission structure on closed deals.
-        </p>
       </div>
 
-      <div className="py-16 md:py-20 px-6 lg:px-12 relative z-10">
-        {/* Pricing Cards */}
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-10" style={{ perspective: "2000px" }}>
-          {plans.map((plan, index) => {
-            const Icon = plan.icon;
-            return (
-              <div>
-                <div
-                  className={`relative backdrop-blur-2xl rounded-3xl overflow-hidden transition-all duration-700 h-full ${
-                    plan.popular 
-                      ? 'ring-4 ring-white shadow-2xl' 
-                      : ''
-                  }`}
-                  style={{
-                    background: "rgba(255, 255, 255, 0.05)",
-                    border: "2px solid rgba(255, 255, 255, 0.1)",
-                    boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
-                  }}
-                >
-                  {/* Animated gradient overlay */}
-                  <div
-                    className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-                    style={{
-                      background: "linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))",
-                    }}
-                  ></div>
-
-                  {/* Shine effect */}
-                  <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
-                    <div
-                      className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1500"
-                      style={{
-                        background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
-                      }}
-                    ></div>
-                  </div>
-
-                  {plan.popular && (
-                    <div className="absolute top-0 left-0 right-0 bg-white text-blue-900 text-center py-3 font-black text-sm z-20">
-                      ⭐ Most Popular
-                    </div>
-                  )}
-                  
-                  <div className={`p-8 sm:p-10 relative z-10 ${plan.popular ? 'pt-16' : ''}`}>
-                    {/* Icon */}
-                    <div className="flex justify-center mb-6">
-                      <motion.div 
-                        className={`p-4 rounded-2xl shadow-2xl`}
-                        style={{
-                          background: plan.popular ? "rgba(255, 255, 255, 0.95)" : "rgba(255, 255, 255, 0.1)",
-                          border: "3px solid rgba(255, 255, 255, 0.2)",
-                        }}
-                        whileHover={{ scale: 1.1, rotate: 360 }}
-                        transition={{ duration: 0.6 }}
-                      >
-                        <Icon className={`w-8 h-8 ${
-                          plan.popular ? 'text-blue-900' : 'text-white'
-                        }`} strokeWidth={2.5} />
-                      </motion.div>
-                    </div>
-                    
-                    {/* Plan Name */}
-                    <h3 
-                      className="text-2xl sm:text-3xl font-black text-white text-center mb-3"
-                      style={{
-                        textShadow: "0 4px 20px rgba(0, 0, 0, 0.4)",
-                      }}
-                    >
-                      {plan.name}
-                    </h3>
-                    
-                    {/* Description */}
-                    <p className="text-center text-white/85 mb-6 text-sm md:text-base font-medium">
-                      {plan.description}
-                    </p>
-                    
-                    {/* Price */}
-                    <div className="text-center mb-8">
-                      <span 
-                        className="text-5xl sm:text-6xl font-black text-white"
-                        style={{
-                          textShadow: "0 4px 20px rgba(0, 0, 0, 0.4)",
-                        }}
-                      >
-                        {plan.price}
-                      </span>
-                      {plan.period && (
-                        <span className="text-xl text-white/80 font-bold">{plan.period}</span>
-                      )}
-                    </div>
-
-                    {/* Features */}
-                    <ul className="space-y-4 mb-8">
-                      {plan.features.map((feature, featureIndex) => (
-                        <li 
-                          key={featureIndex} 
-                          className="flex items-start gap-3"
-                        >
-                          <div 
-                            className="flex-shrink-0 w-5 h-5 rounded-full bg-white flex items-center justify-center mt-0.5 shadow-lg"
-                          >
-                            <Check size={12} className="text-blue-900 stroke-[3]" />
-                          </div>
-                          <span className="text-sm md:text-base text-white/90 font-medium">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-
-                    <a href="/login">
-                      <motion.button
-                        className={`w-full py-4 text-base font-black rounded-xl transition-all duration-300 ${
-                          plan.popular
-                            ? 'bg-white text-blue-900 shadow-2xl'
-                            : 'border-2 border-white text-white'
-                        }`}
-                        style={{
-                          background: plan.popular ? "rgba(255, 255, 255, 0.95)" : "rgba(255, 255, 255, 0.05)",
-                        }}
-                        whileHover={{ 
-                          scale: 1.05,
-                          background: plan.popular ? "rgba(255, 255, 255, 1)" : "rgba(255, 255, 255, 0.15)",
-                        }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        {plan.buttonText}
-                      </motion.button>
-                    </a>
-                  </div>
-
-                  {/* Bottom accent line */}
-                  <div
-                    className="absolute bottom-0 left-0 h-1 w-0 group-hover:w-full transition-all duration-1000 ease-out"
-                    style={{
-                      background: "linear-gradient(90deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.3))",
-                      boxShadow: "0 0 20px rgba(255, 255, 255, 0.5)",
-                    }}
-                  ></div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* FAQ Section */}
-        <div className="max-w-5xl mx-auto mt-32 sm:mt-40 relative z-10">
-          <div className="text-center mb-16 sm:mb-20" style={{ perspective: "1500px" }}>
-            <h2 
-              ref={faqTitleRef}
-              className="text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-6"
-              style={{
-                textShadow: "0 10px 40px rgba(0, 0, 0, 0.5)",
-              }}
-            >
-              Frequently Asked{" "}
-              <span className="block bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent mt-2">
-                Questions
-              </span>
-            </h2>
-            <p 
-              ref={faqDescRef}
-              className="text-base md:text-lg lg:text-xl text-white/90 font-medium"
-              style={{
-                textShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-              }}
-            >
-              Everything you need to know about our pricing and features
-            </p>
-          </div>
-          
-          <div className="space-y-6">
-            {[
-              {
-                question: "How does the commission structure work?",
-                answer: "We charge a 1% commission only on deals that close through leads generated by our platform. This ensures we're aligned with your success."
-              },
-              {
-                question: "Can I customize my avatars?",
-                answer: "Yes! All plans include avatar customization. Professional and Enterprise plans offer advanced training and personality customization options."
-              },
-              {
-                question: "What CRM integrations are available?",
-                answer: "We integrate with HubSpot, Salesforce, Zoho, and most major real estate CRMs. Enterprise plans include custom integration development."
-              },
-              {
-                question: "Is there a free trial?",
-                answer: "Yes! Start with a 14-day free trial on any plan. No credit card required to begin."
-              }
-            ].map((faq, idx) => (
-              <motion.div 
-                key={idx}
-                ref={(el) => (faqItemsRef.current[idx] = el)}
-                className="group p-8 rounded-2xl backdrop-blur-sm transition-all duration-300 cursor-pointer"
-                style={{
-                  background: "rgba(255, 255, 255, 0.05)",
-                  border: "2px solid rgba(255, 255, 255, 0.1)",
-                }}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.1 + idx * 0.08 }}
-                whileHover={{ 
-                  scale: 1.02,
-                  background: "rgba(255, 255, 255, 0.08)",
-                  borderColor: "rgba(255, 255, 255, 0.2)",
-                }}
-              >
-                <h3 
-                  className="text-xl sm:text-2xl font-bold text-white mb-3"
-                  style={{
-                    textShadow: "0 4px 20px rgba(0, 0, 0, 0.4)",
-                  }}
-                >
-                  {faq.question}
-                </h3>
-                <p className="text-sm md:text-base lg:text-lg text-white/85 leading-relaxed font-medium">
-                  {faq.answer}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <FAQ />
     </div>
   );
 };

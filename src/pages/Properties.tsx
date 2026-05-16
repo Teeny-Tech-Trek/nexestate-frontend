@@ -107,22 +107,22 @@ const Properties: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a1628] via-[#0f1e3a] to-[#0a1628] p-4 sm:p-6 lg:p-10">
-      {/* Ambient blobs — same as Avatars */}
+    <div className="min-h-screen bg-gradient-to-br from-[#0a1628] via-[#0f1e3a] to-[#0a1628]" style={{ padding: "clamp(12px, 2vw, 32px)" }}>
+      {/* Ambient blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none opacity-40">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-8 lg:py-12">
+      <div className="relative max-w-[1600px] mx-auto" style={{ padding: "clamp(12px, 2vw, 32px) clamp(8px, 1.5vw, 24px)" }}>
 
         {/* ── Header ── */}
-        <div className="mb-12">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 mb-12">
-            <div className="space-y-2">
-              <p className="text-xs uppercase tracking-[0.18em] text-blue-400/70 font-medium">{scopeLabel}</p>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight">Properties</h1>
-              <p className="text-lg text-slate-400">Manage your real estate portfolio</p>
+        <div className="mb-6 lg:mb-10">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 lg:gap-8 mb-6 lg:mb-10">
+            <div className="space-y-1.5 min-w-0">
+              <p className="uppercase tracking-[0.18em] text-blue-400/70 font-medium" style={{ fontSize: "clamp(10px, 0.75vw, 12px)" }}>{scopeLabel}</p>
+              <h1 className="font-bold text-white tracking-tight" style={{ fontSize: "clamp(1.8rem, 4vw, 3.4rem)" }}>Properties</h1>
+              <p className="text-slate-400" style={{ fontSize: "clamp(0.9rem, 1.3vw, 1.15rem)" }}>Manage your real estate portfolio</p>
             </div>
 
             <div className="flex flex-wrap items-center gap-3 sm:gap-4">

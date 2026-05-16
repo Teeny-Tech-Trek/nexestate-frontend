@@ -136,8 +136,8 @@ export const DeleteAccountModal: React.FC<Props> = ({ user, onClose, onSuccess }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
-      <div className="bg-gradient-to-br from-slate-900 to-[#0d1b34] border border-slate-700/60 rounded-xl shadow-2xl max-w-md w-full mx-4 text-slate-100">
+    <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50" style={{ padding: "clamp(12px, 3vw, 32px)" }}>
+      <div className="bg-gradient-to-br from-slate-900 to-[#0d1b34] border border-slate-700/60 rounded-xl shadow-2xl w-full text-slate-100" style={{ maxWidth: "min(440px, 100%)", maxHeight: "min(90vh, calc(100vh - 24px))", overflow: "auto" }}>
         {step === 'confirm' && (
           <div className="p-6">
             <h2 className="text-2xl font-bold text-red-600 mb-4">Delete Account</h2>

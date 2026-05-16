@@ -128,8 +128,8 @@ const AgentChatPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 py-4 px-3 sm:px-6">
-      <div className="mx-auto max-w-5xl grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div className="min-h-screen bg-slate-100" style={{ padding: "clamp(8px, 1.5vw, 24px) clamp(8px, 1.5vw, 24px)" }}>
+      <div className="mx-auto grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-4" style={{ maxWidth: "min(1280px, 100%)" }}>
         <section className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
           <header className="px-4 py-3 border-b border-slate-200 flex items-center gap-3">
             <img
@@ -138,15 +138,16 @@ const AgentChatPage = () => {
               loading="eager"
               decoding="sync"
               fetchPriority="high"
-              className="h-10 w-10 rounded-full object-cover bg-slate-200"
+              className="rounded-full object-cover bg-slate-200 flex-shrink-0"
+              style={{ width: "clamp(36px, 3vw, 44px)", height: "clamp(36px, 3vw, 44px)" }}
             />
-            <div>
-              <h1 className="text-sm font-semibold text-slate-900">{agent.name}</h1>
-              <p className="text-xs text-slate-500">AI Property Consultant</p>
+            <div className="min-w-0">
+              <h1 className="font-semibold text-slate-900 truncate" style={{ fontSize: "clamp(13px, 1vw, 15px)" }}>{agent.name}</h1>
+              <p className="text-slate-500" style={{ fontSize: "clamp(11px, 0.8vw, 12.5px)" }}>AI Property Consultant</p>
             </div>
           </header>
 
-          <div className="h-[62vh] overflow-y-auto p-4 space-y-3">
+          <div className="overflow-y-auto space-y-3" style={{ height: "min(62vh, calc(100vh - 200px))", padding: "clamp(12px, 1.6vw, 20px)" }}>
             {messages.map((message, idx) => {
               const isUser = message.sender === "user";
               return (

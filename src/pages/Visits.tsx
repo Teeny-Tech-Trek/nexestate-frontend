@@ -270,13 +270,13 @@ export default function Visits() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#0a1628] via-[#0f1e3a] to-[#0a1628]">
-      <div className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-8 lg:py-12">
-        <div className="mb-10">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 mb-7">
-            <div>
-              <h1 className="text-5xl font-bold text-white tracking-tight">Visits</h1>
-              <p className="text-cyan-300 mt-2 font-medium">{scopeLabel}</p>
-              <p className="text-slate-400 mt-1">Manage scheduled, completed, cancelled and no-show visits.</p>
+      <div className="relative max-w-[1600px] mx-auto" style={{ padding: "clamp(16px, 3vw, 48px) clamp(12px, 2vw, 32px)" }}>
+        <div className="mb-6 lg:mb-10">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-5 lg:mb-7">
+            <div className="min-w-0">
+              <h1 className="font-bold text-white tracking-tight" style={{ fontSize: "clamp(1.8rem, 4vw, 3.2rem)" }}>Visits</h1>
+              <p className="text-cyan-300 mt-1.5 font-medium" style={{ fontSize: "clamp(0.85rem, 1.1vw, 1rem)" }}>{scopeLabel}</p>
+              <p className="text-slate-400 mt-1" style={{ fontSize: "clamp(0.85rem, 1.1vw, 1rem)" }}>Manage scheduled, completed, cancelled and no-show visits.</p>
             </div>
             <div className="flex items-center gap-3">
               {(scope.agentId || scope.propertyId) && (

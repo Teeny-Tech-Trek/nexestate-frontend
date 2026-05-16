@@ -114,15 +114,15 @@ export default function Leads() {
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative max-w-[1400px] mx-auto px-6 lg:px-8 py-8 lg:py-12">
-        <div className="mb-10">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 mb-7">
-            <div>
-              <h1 className="text-5xl font-bold text-white tracking-tight">Leads</h1>
-              <p className="text-cyan-300 mt-2 font-medium">
+      <div className="relative max-w-[1600px] mx-auto" style={{ padding: "clamp(16px, 3vw, 48px) clamp(12px, 2vw, 32px)" }}>
+        <div className="mb-6 lg:mb-10">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-5 lg:mb-7">
+            <div className="min-w-0">
+              <h1 className="font-bold text-white tracking-tight" style={{ fontSize: "clamp(1.8rem, 4vw, 3.2rem)" }}>Leads</h1>
+              <p className="text-cyan-300 mt-1.5 font-medium" style={{ fontSize: "clamp(0.85rem, 1.1vw, 1rem)" }}>
                 {scopeLabel}
               </p>
-              <p className="text-slate-400 mt-1">
+              <p className="text-slate-400 mt-1" style={{ fontSize: "clamp(0.85rem, 1.1vw, 1rem)" }}>
                 {logic.isOwnerOrAdmin
                   ? "You can review all organization leads and member ownership."
                   : "You can review and manage your own leads."}

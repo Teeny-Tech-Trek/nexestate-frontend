@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { setCookie } from '../lib/utils';
 
 interface SignupFormData {
   firstName: string;
@@ -12,15 +13,15 @@ interface SignupFormData {
   password: string;
 }
 
-export const useSignupForm = () => {
+export const useSignupForm = (initial?: Partial<SignupFormData>, onboardingToken?: string) => {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<SignupFormData>({
-    firstName: '',
-    lastName: '',
-    email: '',
-    companyName: '',
-    phoneNumber: '',
-    accountType: '',
+    firstName: initial?.firstName || '',
+    lastName: initial?.lastName || '',
+    email: initial?.email || '',
+    companyName: initial?.companyName || '',
+    phoneNumber: initial?.phoneNumber || '',
+    accountType: (initial?.accountType as any) || '',
     password: ''
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -80,7 +81,25 @@ export const useSignupForm = () => {
         company: formData.accountType === 'organization' ? formData.companyName : undefined,
       };
 
-      // Use AuthContext signup method
+      if (onboardingToken) {
+        const { completeGoogleOnboarding } = await import('../services/api');
+        const response = await completeGoogleOnboarding({
+          onboardingToken,
+          firstName: payload.firstName,
+          lastName: payload.lastName,
+          phoneNumber: payload.phoneNumber || '',
+          accountType: payload.accountType as 'individual' | 'organization',
+          organizationName: payload.company,
+        });
+        if (response?.accessToken) {
+          setCookie('accessToken', response.accessToken, 7);
+        }
+        // Let AuthProvider refresh on next route load
+        navigate('/dashboard');
+        return;
+      }
+
+      // Use AuthContext signup method for manual signup
       await signup(payload);
 
       // If signup successful, navigate to dashboard

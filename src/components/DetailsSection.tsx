@@ -1,564 +1,625 @@
-import React, { useState, useEffect, useRef } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { motion } from "framer-motion";
-import { useScrollAnimation } from "@/hooks/useScrollAnimation";
+import { motion, useInView, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import React from "react";
 
-gsap.registerPlugin(ScrollTrigger);
+// ─────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────
+interface Feature {
+  icon: React.ReactNode;
+  iconGradient: string;
+  glowColor: string;
+  title: string;
+  desc: string;
+  badge: string;
+  badgeColor: string;
+}
 
-type FloatingParticleProps = {
-  delay: number;
-  duration: number;
-  initialX: number;
-  initialY: number;
-  size?: number;
-};
+// ─────────────────────────────────────────────
+// Feature data
+// ─────────────────────────────────────────────
+const FEATURES: Feature[] = [
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+        <circle cx="12" cy="8" r="4" stroke="white" strokeWidth="1.8" />
+        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+    iconGradient: "linear-gradient(135deg,#6c3fc5,#3b82f6)",
+    glowColor: "rgba(108,63,197,0.55)",
+    title: "Avatar Creation",
+    desc: "Create as many AI agents as you need",
+    badge: "Unlimited",
+    badgeColor: "#d946ef",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+        <circle cx="12" cy="12" r="9" stroke="white" strokeWidth="1.8" />
+        <path d="M12 7v5l3 3" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+    iconGradient: "linear-gradient(135deg,#db2777,#f97316)",
+    glowColor: "rgba(219,39,119,0.55)",
+    title: "Lead Capture",
+    desc: "Never miss a potential client",
+    badge: "24/7",
+    badgeColor: "#d946ef",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="white" strokeWidth="1.8" strokeLinecap="round" />
+      </svg>
+    ),
+    iconGradient: "linear-gradient(135deg,#0891b2,#0284c7)",
+    glowColor: "rgba(8,145,178,0.55)",
+    title: "CRM Integration",
+    desc: "Seamless connection to your tools",
+    badge: "All Major",
+    badgeColor: "#38bdf8",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+        <rect x="3" y="14" width="3" height="7" rx="1" fill="white" />
+        <rect x="9" y="9" width="3" height="12" rx="1" fill="white" />
+        <rect x="15" y="5" width="3" height="16" rx="1" fill="white" />
+        <path d="M21 4l-7 7-4-4-6 6" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    iconGradient: "linear-gradient(135deg,#059669,#10b981)",
+    glowColor: "rgba(5,150,105,0.55)",
+    title: "Analytics",
+    desc: "Track performance instantly",
+    badge: "Real-time",
+    badgeColor: "#34d399",
+  },
+  {
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+        <circle cx="12" cy="12" r="9" stroke="white" strokeWidth="1.8" />
+        <path d="M12 7v1m0 8v1M9.5 9.5A2.5 2.5 0 0 1 12 8a2.5 2.5 0 0 1 0 5 2.5 2.5 0 0 0 0 5 2.5 2.5 0 0 0 2.5-1.5" stroke="white" strokeWidth="1.5" strokeLinecap="round" />
+      </svg>
+    ),
+    iconGradient: "linear-gradient(135deg,#d97706,#f59e0b)",
+    glowColor: "rgba(217,119,6,0.55)",
+    title: "Commission",
+    desc: "Automatic commission tracking",
+    badge: "1% Auto-calc",
+    badgeColor: "#d946ef",
+  },
+];
 
-const DetailsSection = () => {
-  const sectionRef = useRef(null);
-  const titleRef = useRef(null);
-  const badgeRef = useRef(null);
-  const leftCardRef = useRef(null);
-  const rightCardRef = useRef(null);
-  const featuresRef = useRef([]);
-  const inputsRef = useRef([]);
+// ─────────────────────────────────────────────
+// 3-D tilt card hook
+// ─────────────────────────────────────────────
+function use3DTilt() {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const springX = useSpring(x, { stiffness: 200, damping: 20 });
+  const springY = useSpring(y, { stiffness: 200, damping: 20 });
+  const rotateX = useTransform(springY, [-0.5, 0.5], [6, -6]);
+  const rotateY = useTransform(springX, [-0.5, 0.5], [-6, 6]);
+
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = ref.current?.getBoundingClientRect();
+    if (!rect) return;
+    x.set((e.clientX - rect.left) / rect.width - 0.5);
+    y.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+  const onLeave = () => { x.set(0); y.set(0); };
+
+  return { ref, rotateX, rotateY, onMove, onLeave };
+}
+
+// ─────────────────────────────────────────────
+// Floating particle (same DNA as Hero stars)
+// ─────────────────────────────────────────────
+const PARTICLES = Array.from({ length: 60 }, (_, i) => ({
+  id: i,
+  w: Math.random() * 2.5 + 1,
+  left: Math.random() * 100,
+  top: Math.random() * 100,
+  opacity: Math.random() * 0.55 + 0.08,
+  dur: 2 + Math.random() * 4,
+  delay: Math.random() * 5,
+}));
+
+// ─────────────────────────────────────────────
+// Main component
+// ─────────────────────────────────────────────
+const DetailSection: React.FC = () => {
+  const sectionRef = useRef<HTMLElement>(null);
+  const inView = useInView(sectionRef, { once: true, margin: "-100px" });
+
+  const leftTilt = use3DTilt();
+  const rightTilt = use3DTilt();
+
+  const [form, setForm] = useState({ name: "", email: "", agency: "" });
   const [isMobile, setIsMobile] = useState(false);
-  
-  // Use scroll detection to trigger animations
-  const { isVisible } = useScrollAnimation({
-    threshold: 0.15,
-    rootMargin: '50px',
-  });
-  
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    company: ""
-  });
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
   }, []);
-
-  useEffect(() => {
-    if (!isVisible) return;
-
-    // Animate badge - Simplified for performance
-    gsap.fromTo(
-      badgeRef.current,
-      { opacity: 0, scale: 0.8, rotationY: -90 },
-      {
-        opacity: 1,
-        scale: 1,
-        rotationY: 0,
-        duration: 0.6,
-        ease: "back.out(1.2)",
-      }
-    );
-
-    // Animate title - Reduced 3D complexity
-    gsap.fromTo(
-      titleRef.current,
-      { opacity: 0, y: 80 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.8,
-        delay: 0.1,
-        ease: "power3.out",
-      }
-    );
-
-    // Animate left card - Simplified
-    gsap.fromTo(
-      leftCardRef.current,
-      { opacity: 0, x: -60, rotateY: -15 },
-      {
-        opacity: 1,
-        x: 0,
-        rotateY: 0,
-        duration: 0.8,
-        delay: 0.15,
-        ease: "power3.out",
-      }
-    );
-
-    // Animate right card - Simplified
-    gsap.fromTo(
-      rightCardRef.current,
-      { opacity: 0, x: 60, rotateY: 15 },
-      {
-        opacity: 1,
-        x: 0,
-        rotateY: 0,
-        duration: 0.8,
-        delay: 0.15,
-        ease: "power3.out",
-      }
-    );
-
-    // Animate features with stagger
-    gsap.fromTo(
-      featuresRef.current,
-      { opacity: 0, x: -20, scale: 0.95 },
-      {
-        opacity: 1,
-        x: 0,
-        scale: 1,
-        duration: 0.5,
-        stagger: 0.08,
-        ease: "power2.out",
-      }
-    );
-
-    // Animate inputs with stagger
-    gsap.fromTo(
-      inputsRef.current,
-      { opacity: 0, y: 20, scale: 0.95 },
-      {
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        duration: 0.5,
-        stagger: 0.08,
-        ease: "power2.out",
-      }
-    );
-
-    return () => {
-      ScrollTrigger.getAll().forEach((trigger) => trigger.kill());
-    };
-  }, [isVisible]);
-
-  // Floating particles component - Memoized for performance
-  const FloatingParticle = React.memo(
-    ({ delay, duration, initialX, initialY, size = 2 }: FloatingParticleProps) => (
-      <motion.div
-        className="absolute rounded-full bg-white/20"
-        style={{ width: size, height: size, willChange: "transform" }}
-        initial={{ x: initialX, y: initialY, opacity: 0 }}
-        animate={{
-          x: [initialX, initialX + 40, initialX],
-          y: [initialY, initialY - 80, initialY],
-          opacity: [0, 0.4, 0],
-        }}
-        transition={{
-          duration,
-          delay,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-    )
-  );
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (!formData.fullName || !formData.email) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
-    alert("Request submitted successfully!");
-
-    setFormData({
-      fullName: "",
-      email: "",
-      company: ""
-    });
-  };
-
-  const features = [
-    { 
-      icon: "🎭",
-      label: "Avatar Creation", 
-      value: "Unlimited",
-      description: "Create as many AI agents as you need"
-    },
-    { 
-      icon: "🎯",
-      label: "Lead Capture", 
-      value: "24/7",
-      description: "Never miss a potential client"
-    },
-    { 
-      icon: "🔗",
-      label: "CRM Integration", 
-      value: "All Major",
-      description: "Seamless connection to your tools"
-    },
-    { 
-      icon: "📊",
-      label: "Analytics", 
-      value: "Real-time",
-      description: "Track performance instantly"
-    },
-    { 
-      icon: "💰",
-      label: "Commission", 
-      value: "1% Auto-calc",
-      description: "Automatic commission tracking"
-    }
-  ];
 
   return (
     <section
       ref={sectionRef}
-      className="overflow-hidden relative w-full py-16 md:py-24"
+      className="relative overflow-hidden flex items-center justify-center"
       style={{
-        background: 'linear-gradient(135deg, #1e3a8a 0%, #1e293b 50%, #1e3a8a 100%)',
+        background: "linear-gradient(135deg,#060b24 0%,#0d1340 50%,#060b24 100%)",
+        minHeight: "100vh",
+        paddingTop: isMobile ? "48px" : "40px",
+        paddingBottom: isMobile ? "48px" : "40px",
       }}
-      id="details"
     >
-      {/* Animated gradient background - Same as HumanoidSection */}
-      <div className="absolute inset-0">
+      <style>{`
+        @keyframes shimmer-detail { 0%,100%{background-position:0%} 50%{background-position:100%} }
+        @keyframes detail-pulse   { 0%,100%{transform:scale(1);opacity:1} 50%{transform:scale(1.35);opacity:.65} }
+        @keyframes timeline-flow  { 0%{background-position:0% 0%} 100%{background-position:0% 100%} }
+        .feat-input { outline:none; transition:border-color .2s,box-shadow .2s; }
+        .feat-input:focus {
+          border-color: rgba(108,63,197,0.7) !important;
+          box-shadow: 0 0 0 3px rgba(108,63,197,0.18), 0 0 18px rgba(108,63,197,0.22);
+        }
+        .feat-card-wrap:hover .feat-card-inner {
+          border-color: rgba(108,63,197,0.38) !important;
+          background: rgba(255,255,255,0.055) !important;
+        }
+        .feat-card-wrap:hover .feat-icon-glow {
+          opacity: 1 !important;
+        }
+        .cta-btn:hover {
+          box-shadow: 0 0 50px rgba(108,63,197,0.65) !important;
+          transform: scale(1.03) translateY(-1px);
+        }
+        .cta-btn:active { transform: scale(0.97); }
+        .cta-btn { transition: box-shadow .25s, transform .2s; }
+        @media (max-width: 520px) {
+          .platform-card { padding: 18px !important; }
+          .platform-header { align-items: flex-start !important; }
+          .platform-timeline-line { left: 6px !important; }
+          .platform-feature-row {
+            align-items: stretch !important;
+            gap: 10px !important;
+          }
+          .platform-dot {
+            margin-left: 0 !important;
+            margin-top: 44px;
+          }
+          .platform-feature-card {
+            display: grid !important;
+            grid-template-columns: 40px minmax(0, 1fr);
+            align-items: start !important;
+            gap: 12px !important;
+            padding: 14px !important;
+          }
+          .platform-feature-text { min-width: 0; }
+          .platform-feature-title {
+            font-size: 15px !important;
+            line-height: 1.25 !important;
+          }
+          .platform-feature-desc {
+            font-size: 13px !important;
+            line-height: 1.4 !important;
+            max-width: 100%;
+          }
+          .platform-feature-badge {
+            grid-column: 2;
+            justify-self: start;
+            white-space: normal !important;
+            font-size: 14px !important;
+            line-height: 1.25 !important;
+            margin-top: 2px;
+          }
+        }
+      `}</style>
+
+      {/* ── Same animated radial glows as Hero ── */}
+      <div className="absolute inset-0 pointer-events-none">
         <motion.div
-          className="absolute top-0 left-0 w-full h-full"
+          className="absolute inset-0"
           animate={{
             background: [
-              'radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
-              'radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
-              'radial-gradient(circle at 20% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 50%)',
-            ]
+              "radial-gradient(ellipse 55% 55% at 10% 60%,rgba(59,130,246,0.20) 0%,transparent 65%)",
+              "radial-gradient(ellipse 55% 55% at 16% 65%,rgba(99,102,241,0.26) 0%,transparent 65%)",
+              "radial-gradient(ellipse 55% 55% at 10% 60%,rgba(59,130,246,0.20) 0%,transparent 65%)",
+            ],
           }}
-          transition={{ duration: 10, repeat: Infinity }}
+          transition={{ duration: 9, repeat: Infinity }}
+        />
+        <motion.div
+          className="absolute inset-0"
+          animate={{
+            background: [
+              "radial-gradient(ellipse 50% 60% at 90% 35%,rgba(108,63,197,0.22) 0%,transparent 65%)",
+              "radial-gradient(ellipse 50% 60% at 84% 42%,rgba(139,92,246,0.28) 0%,transparent 65%)",
+              "radial-gradient(ellipse 50% 60% at 90% 35%,rgba(108,63,197,0.22) 0%,transparent 65%)",
+            ],
+          }}
+          transition={{ duration: 9, repeat: Infinity, delay: 2.5 }}
+        />
+        {/* bottom-center accent */}
+        <motion.div
+          className="absolute inset-0"
+          animate={{
+            background: [
+              "radial-gradient(ellipse 40% 30% at 50% 95%,rgba(56,189,248,0.12) 0%,transparent 70%)",
+              "radial-gradient(ellipse 40% 30% at 50% 95%,rgba(56,189,248,0.20) 0%,transparent 70%)",
+              "radial-gradient(ellipse 40% 30% at 50% 95%,rgba(56,189,248,0.12) 0%,transparent 70%)",
+            ],
+          }}
+          transition={{ duration: 6, repeat: Infinity, delay: 1 }}
         />
       </div>
 
-      {/* Grid overlay - Same as HumanoidSection */}
-      <div 
-        className="absolute inset-0 opacity-[0.05]"
+      {/* ── Grid overlay ── */}
+      <div
+        className="absolute inset-0 opacity-[0.04] pointer-events-none"
         style={{
-          backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)',
-          backgroundSize: '50px 50px'
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px)",
+          backgroundSize: "60px 60px",
         }}
       />
 
-      {/* Floating particles - Reduced count for better performance */}
-      {!isMobile && (
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(8)].map((_, i) => (
-            <FloatingParticle
-              key={i}
-              delay={i * 0.5}
-              duration={5 + i * 0.2}
-              initialX={Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000)}
-              initialY={Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800)}
-              size={Math.random() * 2.5 + 1}
-            />
-          ))}
-        </div>
-      )}
-
-      <div className="container px-6 lg:px-12 mx-auto relative z-10">
-        {/* Header Section with 3D Transform */}
-        <div className="text-center mb-20" style={{ perspective: "1500px" }}>
-        
-
-          <h2
-            ref={titleRef}
-            className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black text-white mb-8 leading-tight"
+      {/* ── Stars ── */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {PARTICLES.map((p) => (
+          <div
+            key={p.id}
+            className="absolute rounded-full bg-white"
             style={{
-              textShadow: "0 10px 40px rgba(0, 0, 0, 0.5)",
-              transform: `translateZ(100px)`,
+              width: `${p.w}px`, height: `${p.w}px`,
+              left: `${p.left}%`, top: `${p.top}%`,
+              opacity: p.opacity,
+              animation: `detail-pulse ${p.dur}s ease-in-out infinite`,
+              animationDelay: `${p.delay}s`,
             }}
+          />
+        ))}
+      </div>
+
+      {/* ── Section heading ── */}
+      <div className="container mx-auto px-6 lg:px-12 relative z-10">
+        <motion.div
+          className="text-center mb-6"
+          initial={{ opacity: 0, y: 32 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.75, ease: "easeOut" }}
+        >
+          {/* badge — same pill style as Hero */}
+          <div
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full body-font mb-4"
+            style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.18)" }}
           >
-            Everything You Need to{" "}
-            <span className="block bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent mt-2">
+            <div
+              className="w-6 h-6 rounded-full flex items-center justify-center font-black text-white"
+              style={{ background: "linear-gradient(135deg,#6c3fc5,#3b82f6)", fontSize: "0.7rem" }}
+            >
+              ✦
+            </div>
+            <span className="landing-eyebrow text-white/90">Your All-in-One Platform for Virtual Sales Success</span>
+          </div>
+
+          <h2 className="hero-font landing-title">
+            <span className="font-heading text-white">Everything You Need to </span>
+            <span
+            className="font-heading"
+              style={{
+                background: "linear-gradient(90deg,#a78bfa,#60a5fa,#a78bfa)",
+                backgroundSize: "200%",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                backgroundClip: "text",
+                animation: "shimmer-detail 4s ease infinite",
+              }}
+            >
+              <br />
               Succeed
             </span>
           </h2>
-        </div>
+        </motion.div>
 
-        {/* Cards Grid - 3D Layout */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-2" style={{ perspective: "2000px" }}>
-          {/* Left Card - Features */}
+        {/* ── Two-column card grid ── */}
+        <div className="flex flex-col lg:flex-row gap-6 items-stretch">
+
+          {/* ════════════ LEFT — Platform Features ════════════ */}
           <motion.div
-            ref={leftCardRef}
-            className="group relative"
-            style={{
-              transformStyle: "preserve-3d",
-            }}
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.3 }}
+            className="w-full lg:w-1/2"
+            style={{ perspective: "1200px" }}
+            initial={{ opacity: 0, x: -48 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.85, ease: "easeOut", delay: 0.1 }}
           >
-            <div
-              className="relative backdrop-blur-2xl rounded-3xl overflow-hidden transition-all duration-700"
+            <motion.div
+              ref={leftTilt.ref}
+              onMouseMove={leftTilt.onMove}
+              onMouseLeave={leftTilt.onLeave}
               style={{
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "2px solid rgba(255, 255, 255, 0.1)",
-                boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
+                rotateX: leftTilt.rotateX,
+                rotateY: leftTilt.rotateY,
+                transformStyle: "preserve-3d",
               }}
+              className="h-full rounded-2xl p-3"
+              {...({} as object)}
             >
-              {/* Animated gradient overlay */}
+              {/* glass card */}
               <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
+                className="platform-card h-full rounded-2xl p-4"
                 style={{
-                  background: "linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))",
+                  background: "rgba(255,255,255,0.028)",
+                  border: "1px solid rgba(255,255,255,0.09)",
+                  backdropFilter: "blur(18px)",
+                  boxShadow: "0 8px 48px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06)",
+                  transform: "translateZ(0px)",
                 }}
-              ></div>
-
-              {/* Shine effect */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
-                <div
-                  className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1500"
-                  style={{
-                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
-                  }}
-                ></div>
-              </div>
-
-              {/* Card Header */}
-              <div className="relative p-8 md:p-10 border-b border-white/10">
-                <div className="flex items-center gap-4 mb-4">
-                  <motion.div
-                    className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-xl"
+              >
+                {/* header */}
+                <div className="platform-header flex items-center gap-3 mb-4">
+                  <div
+                    className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0"
                     style={{
-                      background: "rgba(255, 255, 255, 0.1)",
-                      border: "2px solid rgba(255, 255, 255, 0.2)",
+                      background: "linear-gradient(135deg,#6c3fc5,#3b82f6)",
+                      boxShadow: "0 0 22px rgba(108,63,197,0.55)",
                     }}
-                    whileHover={{ scale: 1.1, rotate: 360 }}
-                    transition={{ duration: 0.6 }}
                   >
-                    <span className="text-3xl">⚡</span>
-                  </motion.div>
-                  <h3 className="text-2xl md:text-3xl font-black text-white">
-                    Platform Features
-                  </h3>
+                    <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5">
+                      <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" fill="white" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p className="text-white landing-card-title hero-font">Platform Features</p>
+                    <p className="landing-meta body-font" style={{ color: "rgba(255,255,255,0.55)" }}>
+                      Everything you need to deploy virtual sales agents
+                    </p>
+                  </div>
                 </div>
-                <p className="text-base md:text-lg text-white/90 font-medium">
-                  Everything you need to deploy virtual sales agents
-                </p>
-              </div>
 
-              {/* Card Content */}
-              <div className="relative p-8 md:p-10 space-y-4">
-                {features.map((item, index) => (
-                  <motion.div
-                    key={index}
-                    ref={(el) => (featuresRef.current[index] = el)}
-                    className="group/item relative p-5 md:p-6 rounded-2xl backdrop-blur-sm transition-all duration-300 cursor-pointer"
+                {/* timeline feature list */}
+                <div className="relative">
+                  {/* animated vertical line */}
+                  <div
+                    className="platform-timeline-line absolute top-4 bottom-4 w-px"
                     style={{
-                      background: "rgba(255, 255, 255, 0.05)",
-                      border: "2px solid rgba(255, 255, 255, 0.1)",
+                      left: "19px",
+                      background:
+                        "linear-gradient(to bottom,transparent,rgba(108,63,197,0.6) 15%,rgba(59,130,246,0.6) 50%,rgba(108,63,197,0.6) 85%,transparent)",
+                      backgroundSize: "100% 200%",
+                      animation: "timeline-flow 4s linear infinite",
                     }}
-                    whileHover={{ 
-                      scale: 1.03,
-                      background: "rgba(255, 255, 255, 0.08)",
-                      borderColor: "rgba(255, 255, 255, 0.2)",
-                    }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    <div className="flex items-start gap-4">
+                  />
+
+                  <div className="flex flex-col gap-1.5">
+                    {FEATURES.map((f, i) => (
                       <motion.div
-                        className="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center text-2xl shadow-lg"
-                        style={{
-                          background: "rgba(255, 255, 255, 0.1)",
-                          border: "2px solid rgba(255, 255, 255, 0.2)",
-                        }}
-                        whileHover={{ scale: 1.15, rotate: 12 }}
-                        transition={{ duration: 0.3 }}
+                        key={f.title}
+                        className="platform-feature-row feat-card-wrap flex items-center gap-2.5 relative"
+                        initial={{ opacity: 0, x: -24 }}
+                        animate={inView ? { opacity: 1, x: 0 } : {}}
+                        transition={{ duration: 0.5, delay: 0.35 + i * 0.08, ease: "easeOut" }}
                       >
-                        {item.icon}
-                      </motion.div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-baseline justify-between gap-2 mb-2">
-                          <h4 className="text-base md:text-lg font-bold text-white">
-                            {item.label}
-                          </h4>
-                          <span className="text-base md:text-lg font-black text-white whitespace-nowrap">
-                            {item.value}
+                        {/* glowing dot */}
+                        <div
+                          className="platform-dot w-2.5 h-2.5 rounded-full flex-shrink-0 z-10"
+                          style={{
+                            background: f.iconGradient,
+                            boxShadow: `0 0 10px 3px ${f.glowColor}`,
+                            marginLeft: "14px",
+                          }}
+                        />
+
+                        {/* card */}
+                        <div
+                          className="platform-feature-card feat-card-inner flex-1 flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-200"
+                          style={{
+                            background: "rgba(255,255,255,0.025)",
+                            border: "1px solid rgba(255,255,255,0.07)",
+                          }}
+                        >
+                          {/* icon */}
+                          <div
+                            className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 relative"
+                            style={{ background: f.iconGradient }}
+                          >
+                            {/* inner glow */}
+                            <div
+                              className="feat-icon-glow absolute inset-0 rounded-lg opacity-0 transition-opacity duration-200"
+                              style={{ boxShadow: `0 0 18px 4px ${f.glowColor}`, borderRadius: "inherit" }}
+                            />
+                            <span style={{ transform: "scale(0.8)" }}>{f.icon}</span>
+                          </div>
+
+                          <div className="platform-feature-text flex-1 min-w-0">
+                            <p className="platform-feature-title text-white landing-card-title body-font" style={{ fontSize: "clamp(1rem, 1.1vw, 1.15rem)" }}>{f.title}</p>
+                            <p className="platform-feature-desc landing-meta body-font mt-1" style={{ color: "rgba(255,255,255,0.6)" }}>
+                              {f.desc}
+                            </p>
+                          </div>
+
+                          <span
+                            className="platform-feature-badge font-black body-font whitespace-nowrap"
+                            style={{ color: f.badgeColor, textShadow: `0 0 12px ${f.badgeColor}`, fontSize: "clamp(0.85rem, 1vw, 1rem)" }}
+                          >
+                            {f.badge}
                           </span>
                         </div>
-                        <p className="text-sm md:text-base text-white/85 leading-relaxed">
-                          {item.description}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Bottom accent line */}
-                    <div
-                      className="absolute bottom-0 left-0 h-1 w-0 group-hover/item:w-full transition-all duration-500 ease-out"
-                      style={{
-                        background: "linear-gradient(90deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.3))",
-                        boxShadow: "0 0 10px rgba(255, 255, 255, 0.5)",
-                      }}
-                    ></div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Right Card - Form */}
-          <motion.div
-            ref={rightCardRef}
-            className="group relative"
-            style={{
-              transformStyle: "preserve-3d",
-            }}
-            whileHover={{ scale: 1.02 }}
-            transition={{ duration: 0.3 }}
-          >
-            <div
-              className="relative backdrop-blur-2xl rounded-3xl overflow-hidden transition-all duration-700"
-              style={{
-                background: "rgba(255, 255, 255, 0.05)",
-                border: "2px solid rgba(255, 255, 255, 0.1)",
-                boxShadow: "0 20px 60px rgba(0, 0, 0, 0.3)",
-              }}
-            >
-              {/* Animated gradient overlay */}
-              <div
-                className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-                style={{
-                  background: "linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))",
-                }}
-              ></div>
-
-              {/* Shine effect */}
-              <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000">
-                <div
-                  className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1500"
-                  style={{
-                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)",
-                  }}
-                ></div>
-              </div>
-
-              {/* Card Header */}
-              <div className="relative p-8 md:p-10 border-b border-white/10">
-                <motion.div
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full backdrop-blur-sm mb-4"
-                  style={{
-                    background: "rgba(255, 255, 255, 0.1)",
-                    border: "2px solid rgba(255, 255, 255, 0.2)",
-                  }}
-                  whileHover={{ scale: 1.05 }}
-                >
-                  <div className="w-2 h-2 rounded-full bg-white animate-pulse shadow-lg shadow-white/50"></div>
-                  <span className="text-sm font-bold text-white">Start selling smarter</span>
-                </motion.div>
-                <h3 className="text-2xl md:text-3xl font-black text-white mb-3">
-                  Get Started Today
-                </h3>
-                <p className="text-base md:text-lg text-white/90 font-medium">
-                  Join 2,000+ agents already using our platform
-                </p>
-              </div>
-
-              {/* Card Content - Form */}
-              <div className="relative p-8 md:p-10">
-                <form onSubmit={handleSubmit} className="space-y-5">
-                  <div ref={(el) => (inputsRef.current[0] = el)}>
-                    <label className="block text-sm font-bold text-white mb-2.5">
-                      Full Name *
-                    </label>
-                    <input 
-                      type="text" 
-                      name="fullName" 
-                      value={formData.fullName} 
-                      onChange={handleChange} 
-                      placeholder="John Doe" 
-                      className="w-full px-5 py-4 rounded-xl border-2 backdrop-blur-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white text-base font-semibold transition-all duration-300"
-                      style={{
-                        background: "rgba(255, 255, 255, 0.05)",
-                        borderColor: "rgba(255, 255, 255, 0.2)",
-                      }}
-                      required
-                    />
-                  </div>
-
-                  <div ref={(el) => (inputsRef.current[1] = el)}>
-                    <label className="block text-sm font-bold text-white mb-2.5">
-                      Email Address *
-                    </label>
-                    <input 
-                      type="email" 
-                      name="email" 
-                      value={formData.email} 
-                      onChange={handleChange} 
-                      placeholder="john@example.com" 
-                      className="w-full px-5 py-4 rounded-xl border-2 backdrop-blur-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white text-base font-semibold transition-all duration-300"
-                      style={{
-                        background: "rgba(255, 255, 255, 0.05)",
-                        borderColor: "rgba(255, 255, 255, 0.2)",
-                      }}
-                      required
-                    />
-                  </div>
-
-                  <div ref={(el) => (inputsRef.current[2] = el)}>
-                    <label className="block text-sm font-bold text-white mb-2.5">
-                      Real Estate Agency
-                    </label>
-                    <input 
-                      type="text" 
-                      name="company" 
-                      value={formData.company} 
-                      onChange={handleChange} 
-                      placeholder="Your Agency Name" 
-                      className="w-full px-5 py-4 rounded-xl border-2 backdrop-blur-sm text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-white text-base font-semibold transition-all duration-300"
-                      style={{
-                        background: "rgba(255, 255, 255, 0.05)",
-                        borderColor: "rgba(255, 255, 255, 0.2)",
-                      }}
-                    />
-                  </div>
-
-                  <div ref={(el) => (inputsRef.current[3] = el)}>
-                    <motion.button 
-                      type="submit"
-                      className="w-full px-6 py-4 bg-white text-blue-900 font-black rounded-xl transition-all duration-300 text-base shadow-2xl group/btn"
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      <span className="flex items-center justify-center gap-2">
-                        Start Free Trial
-                        <svg className="w-5 h-5 group-hover/btn:translate-x-1 transition-transform duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
-                      </span>
-                    </motion.button>
-                  </div>
-                </form>
-
-                {/* Trust badges */}
-                <div className="mt-8 pt-6 border-t border-white/10">
-                  <div className="flex items-center justify-center gap-6 text-sm text-white/90 font-semibold">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>No credit card</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                      </svg>
-                      <span>Free 14-day trial</span>
-                    </div>
+                      </motion.div>
+                    ))}
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
+
+          {/* ════════════ RIGHT — Sign-up Form ════════════ */}
+          <motion.div
+            className="w-full lg:w-1/2"
+            style={{ perspective: "1200px" }}
+            initial={{ opacity: 0, x: 48 }}
+            animate={inView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.85, ease: "easeOut", delay: 0.2 }}
+          >
+            <motion.div
+              ref={rightTilt.ref}
+              onMouseMove={rightTilt.onMove}
+              onMouseLeave={rightTilt.onLeave}
+              style={{
+                rotateX: rightTilt.rotateX,
+                rotateY: rightTilt.rotateY,
+                transformStyle: "preserve-3d",
+              }}
+              className="h-full"
+              {...({} as object)}
+            >
+              <div
+                className="h-full rounded-2xl p-5 relative overflow-hidden"
+                style={{
+                  background: "rgba(10,6,30,0.72)",
+                  border: "1px solid rgba(108,63,197,0.28)",
+                  backdropFilter: "blur(22px)",
+                  boxShadow: "0 8px 56px rgba(108,63,197,0.22), 0 0 0 1px rgba(108,63,197,0.10), inset 0 1px 0 rgba(255,255,255,0.07)",
+                  transform: "translateZ(0px)",
+                }}
+              >
+                {/* corner glow */}
+                <div
+                  className="absolute top-0 right-0 w-40 h-40 pointer-events-none"
+                  style={{
+                    background: "radial-gradient(circle at top right,rgba(108,63,197,0.40),transparent 70%)",
+                    borderRadius: "0 1rem 0 0",
+                  }}
+                />
+
+                {/* bottom glow */}
+                <div
+                  className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-24 pointer-events-none"
+                  style={{ background: "radial-gradient(ellipse,rgba(59,130,246,0.18),transparent 70%)" }}
+                />
+
+                {/* badge */}
+                <div
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full body-font mb-3"
+                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.14)" }}
+                >
+                  <span className="text-sm">🚀</span>
+                  <span className="landing-eyebrow text-white/85">Start selling smarter</span>
+                </div>
+
+                <h3
+                  className="hero-font landing-subtitle mb-1.5"
+                  style={{ color: "#fff" }}
+                >
+                  Get Started{" "}
+                  <span
+                    style={{
+                      background: "linear-gradient(90deg,#a78bfa,#60a5fa)",
+                      WebkitBackgroundClip: "text",
+                      WebkitTextFillColor: "transparent",
+                      backgroundClip: "text",
+                    }}
+                  >
+                    Today
+                  </span>
+                </h3>
+
+                <p className="landing-card-description body-font mb-4" style={{ color: "rgba(255,255,255,0.6)" }}>
+                  Join{" "}
+                  <span className="font-bold" style={{ color: "#a78bfa" }}>
+                    2,000+
+                  </span>{" "}
+                  agents already using our platform
+                </p>
+
+                {/* form fields */}
+                <div className="flex flex-col gap-2 relative z-10">
+                  {[
+                    { label: "Full Name", req: true, key: "name", placeholder: "John Doe", type: "text",
+                      icon: <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4"><circle cx="12" cy="8" r="4" stroke="currentColor" strokeWidth="1.8"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg> },
+                    { label: "Email Address", req: true, key: "email", placeholder: "john@example.com", type: "email",
+                      icon: <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4"><rect x="2" y="4" width="20" height="16" rx="3" stroke="currentColor" strokeWidth="1.8"/><path d="M2 8l10 6 10-6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg> },
+                    { label: "Real Estate Agency", req: false, key: "agency", placeholder: "Your Agency Name", type: "text",
+                      icon: <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4"><rect x="3" y="10" width="18" height="12" rx="1.5" stroke="currentColor" strokeWidth="1.8"/><path d="M9 22V16h6v6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/><path d="M3 10l9-7 9 7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg> },
+                  ].map((field) => (
+                    <div key={field.key}>
+                      <label className="landing-meta font-semibold body-font mb-1.5 block" style={{ color: "rgba(255,255,255,0.75)" }}>
+                        {field.label}{" "}
+                        {field.req && <span style={{ color: "#a78bfa" }}>*</span>}
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "rgba(255,255,255,0.30)" }}>
+                          {field.icon}
+                        </span>
+                        <input
+                          type={field.type}
+                          placeholder={field.placeholder}
+                          value={(form as Record<string, string>)[field.key]}
+                          onChange={(e) => setForm((p) => ({ ...p, [field.key]: e.target.value }))}
+                          className="feat-input w-full pl-10 pr-3 py-2.5 rounded-lg text-white body-font placeholder-white/30"
+                          style={{
+                            fontSize: "clamp(0.9rem, 1vw, 1rem)",
+                            background: "rgba(255,255,255,0.048)",
+                            border: "1px solid rgba(255,255,255,0.10)",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* CTA */}
+                <motion.button
+                  whileHover={{ scale: 1.03, boxShadow: "0 0 50px rgba(108,63,197,0.65)" }}
+                  whileTap={{ scale: 0.97 }}
+                  className="cta-btn w-full mt-4 py-3 rounded-lg text-white font-black body-font flex items-center justify-center gap-2 relative z-10"
+                  style={{
+                    fontSize: "clamp(0.95rem, 1.15vw, 1.1rem)",
+                    background: "linear-gradient(135deg,#6c3fc5,#3b82f6)",
+                    boxShadow: "0 4px 32px rgba(108,63,197,0.50)",
+                  }}
+                >
+                  Start Free Trial
+                  <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4">
+                    <path d="M4 10h12M11 5l5 5-5 5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </motion.button>
+
+                {/* trust row */}
+                <div
+                  className="flex items-center justify-center gap-4 mt-2.5 relative z-10 body-font"
+                  style={{ borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: "10px" }}
+                >
+                  {[
+                    {
+                      icon: <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4"><path d="M12 2L4 6v6c0 5 3.5 9.7 8 11 4.5-1.3 8-6 8-11V6l-8-4z" stroke="currentColor" strokeWidth="1.8" strokeLinejoin="round"/><path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
+                      label: "No credit card",
+                    },
+                    {
+                      icon: <svg viewBox="0 0 24 24" fill="none" className="w-4 h-4"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.8"/><path d="M3 10h18" stroke="currentColor" strokeWidth="1.8"/><path d="M8 2v3M16 2v3" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/></svg>,
+                      label: "Free 14-day trial",
+                    },
+                  ].map((t) => (
+                    <div key={t.label} className="flex items-center gap-1.5 landing-meta" style={{ color: "rgba(255,255,255,0.55)" }}>
+                      <span style={{ transform: "scale(0.85)" }}>{t.icon}</span>
+                      {t.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+
         </div>
       </div>
     </section>
   );
 };
 
-export default DetailsSection;
+export default DetailSection;

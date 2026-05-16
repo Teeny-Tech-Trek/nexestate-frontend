@@ -169,10 +169,12 @@ export default {
         'glass-gradient': 'linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%)',
       },
       fontFamily: {
-        'sans': ['Inter', 'system-ui', 'sans-serif'],
-        'display': ['Brockmann', 'SF Pro Display', 'Inter', 'sans-serif'],
-        'brockmann': ['Brockmann', 'system-ui', 'sans-serif'],
-        'playfair': ['"Playfair Display"', 'serif'],
+        'sans': ['Inter', 'sans-serif'],
+        'display': ['Inter', 'sans-serif'],
+        'brockmann': ['Inter', 'sans-serif'],
+        'playfair': ['Inter', 'sans-serif'],
+        'serif': ['Inter', 'sans-serif'],
+        'mono': ['Inter', 'sans-serif'],
       },
       boxShadow: {
         'elegant': '0 8px 30px rgba(0, 0, 0, 0.08)',

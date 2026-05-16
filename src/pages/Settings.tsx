@@ -106,13 +106,13 @@ const Settings: React.FC = () => {
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+      <div className="relative max-w-[1600px] mx-auto" style={{ padding: "clamp(16px, 3vw, 48px) clamp(12px, 2vw, 32px)" }}>
         {/* Header */}
-        <div className="mb-8 sm:mb-10">
-          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-5 sm:gap-6 mb-8 sm:mb-10">
-            <div className="space-y-2">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight">Settings</h1>
-              <p className="text-slate-400 text-sm sm:text-base">
+        <div className="mb-6 lg:mb-10">
+          <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 lg:gap-6 mb-6 lg:mb-10">
+            <div className="space-y-1.5 min-w-0">
+              <h1 className="font-bold text-white tracking-tight" style={{ fontSize: "clamp(1.6rem, 3.2vw, 2.8rem)" }}>Settings</h1>
+              <p className="text-slate-400" style={{ fontSize: "clamp(0.85rem, 1.1vw, 1rem)" }}>
                 {logic.isOrganizationUser
                   ? 'Manage your organization, team, and preferences'
                   : 'Manage your account and preferences'}
